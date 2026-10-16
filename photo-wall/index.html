@@ -19,17 +19,36 @@ header p{color:var(--mute);margin-top:12px;letter-spacing:.2em;font-size:14px}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .add input{display:none}
 .wall{columns:4 240px;column-gap:14px;max-width:1360px;margin:0 auto;padding:0 14px 60px}
-.item{break-inside:avoid;margin-bottom:14px;border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in;background:var(--card);min-height:120px;animation:up .6s both}
-@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.item img{width:100%;display:block;opacity:0;transition:opacity .5s,transform .6s}
-.item img.ok{opacity:1}
-.item:hover img{transform:scale(1.05)}
+.item{break-inside:avoid;margin-bottom:14px;border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in;background:var(--card);min-height:120px;opacity:0;transform:translateY(70px) scale(.9) rotate(var(--r,2deg));filter:blur(10px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
+.item.in{opacity:1;transform:none;filter:none}
+.item.done{transition:transform .35s ease,box-shadow .35s ease}
+.item.done:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.item img{width:100%;display:block;opacity:0;transform:scale(1.2);transition:opacity .8s,transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.item.in img.ok{opacity:1;transform:none}
+.item.done:hover img.ok{transform:scale(1.07);transition:transform .6s}
+h1{perspective:600px}
+.ch{display:inline-block;opacity:0;transform:translateY(34px) rotateX(-80deg);animation:ch .9s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes ch{to{opacity:1;transform:none}}
+header{will-change:transform,opacity}
+header p,.bar{opacity:0;animation:fade 1s forwards}
+header p{animation-delay:.9s}.bar{animation-delay:1.3s}
+@keyframes fade{to{opacity:1}}
+.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.blobs i{position:absolute;width:42vw;height:42vw;border-radius:50%;background:var(--acc);opacity:.17;filter:blur(90px);animation:fl 18s ease-in-out infinite alternate}
+.blobs i:nth-child(1){top:-10vw;left:-8vw}
+.blobs i:nth-child(2){top:35vh;right:-12vw;background:#6a8fd8;animation-duration:24s}
+.blobs i:nth-child(3){bottom:-14vw;left:25vw;background:#d8a86a;animation-duration:21s}
+@keyframes fl{to{transform:translate(8vw,6vh) scale(1.25)}}
+#pg{position:fixed;top:0;left:0;right:0;height:3px;background:var(--acc);transform:scaleX(0);transform-origin:left;z-index:10}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.item,.ch,header p,.bar,.item img{opacity:1!important;transform:none!important;filter:none!important}}
 .cap{position:absolute;inset:auto 0 0 0;padding:28px 14px 10px;color:#fff;font-size:13px;letter-spacing:.08em;background:linear-gradient(transparent,rgba(0,0,0,.6));opacity:0;transition:.3s;font-family:system-ui,sans-serif}
 .item:hover .cap{opacity:1}
 .empty{text-align:center;color:var(--mute);padding:80px 0}
 footer{text-align:center;color:var(--mute);font-size:12px;padding:0 0 40px;letter-spacing:.15em}
-#lb{position:fixed;inset:0;background:rgba(10,9,8,.94);display:none;align-items:center;justify-content:center;z-index:9;flex-direction:column;padding:20px}
-#lb.on{display:flex}
+#lb{position:fixed;inset:0;background:rgba(10,9,8,.94);display:flex;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s;align-items:center;justify-content:center;z-index:9;flex-direction:column;padding:20px}
+#lb.on{opacity:1;visibility:visible}
+#lb img.pop{animation:pop .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes pop{from{opacity:0;transform:scale(.88)}}
 #lb img{max-width:100%;max-height:82vh;border-radius:6px;box-shadow:0 10px 60px #000a}
 #lbc{color:#ddd;margin-top:14px;font-size:14px;letter-spacing:.1em;text-align:center}
 #lb button{position:absolute;background:none;border:0;color:#fff;font-size:34px;cursor:pointer;opacity:.7;padding:14px}
@@ -38,6 +57,7 @@ footer{text-align:center;color:var(--mute);font-size:12px;padding:0 0 40px;lette
 </style>
 </head>
 <body>
+<div class="blobs"><i></i><i></i><i></i></div><div id="pg"></div>
 <header><h1 id="t"></h1><p id="s"></p></header>
 <div class="bar" id="bar"></div>
 <main class="wall" id="wall"></main>
@@ -54,8 +74,8 @@ const PHOTOS = [
 /* ====================================== */
 
 const $ = id => document.getElementById(id);
-let list = PHOTOS.slice(), cur = "全部", shown = [], idx = 0;
-document.title = SITE.title; $("t").textContent = SITE.title; $("s").textContent = SITE.subtitle;
+let list = PHOTOS.slice(), cur = "全部", shown = [], idx = 0, io;
+document.title = SITE.title; [...SITE.title].forEach((c, i) => { const s = document.createElement("span"); s.className = "ch"; s.textContent = c === " " ? "\u00a0" : c; s.style.animationDelay = i * 90 + "ms"; $("t").appendChild(s); }); $("s").textContent = SITE.subtitle;
 $("f").textContent = "© " + new Date().getFullYear() + " " + SITE.title;
 
 if (!list.length) { // 没有照片时显示示例渐变图
@@ -88,21 +108,32 @@ function bar() {
 function wall() {
   shown = list.filter(p => cur === "全部" || p.tag === cur);
   const w = $("wall"); w.innerHTML = "";
+  if (io) io.disconnect();
+  io = new IntersectionObserver(es => { // 同一批进入视野的卡片，按位置依次显现
+    es.filter(e => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
+      .forEach((e, k) => {
+        const d = e.target; io.unobserve(d);
+        d.style.transitionDelay = k * 120 + "ms"; d.classList.add("in");
+        setTimeout(() => { d.classList.add("done"); d.style.transitionDelay = ""; }, k * 120 + 1000);
+      });
+  }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
   if (!shown.length) { w.innerHTML = "<div class='empty'>这里还没有照片</div>"; return; }
   shown.forEach((p, i) => {
     const d = document.createElement("figure");
-    d.className = "item"; d.style.animationDelay = Math.min(i * 40, 600) + "ms";
+    d.className = "item"; d.style.setProperty("--r", (Math.random() * 6 - 3).toFixed(1) + "deg");
     const im = new Image(); im.loading = "lazy"; im.alt = p.title || ""; im.src = p.src;
     im.onload = () => im.classList.add("ok");
     d.append(im);
     if (p.title) { const c = document.createElement("div"); c.className = "cap"; c.textContent = p.title; d.append(c); }
     d.onclick = () => open(i);
-    w.appendChild(d);
+    w.appendChild(d); io.observe(d);
   });
 }
 
 function open(i) { idx = (i + shown.length) % shown.length; const p = shown[idx];
-  $("lbi").src = p.src; $("lbc").textContent = (p.title || "") + "  " + (idx + 1) + " / " + shown.length;
+  const im = $("lbi"); im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
+  im.src = p.src; $("lbc").textContent = (p.title || "") + "  " + (idx + 1) + " / " + shown.length;
   $("lb").classList.add("on"); }
 const close = () => $("lb").classList.remove("on");
 $("x").onclick = close; $("pv").onclick = e => { e.stopPropagation(); open(idx - 1); };
@@ -113,6 +144,13 @@ addEventListener("keydown", e => { if (!$("lb").classList.contains("on")) return
 let sx = 0;
 $("lb").addEventListener("touchstart", e => sx = e.touches[0].clientX);
 $("lb").addEventListener("touchend", e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) open(idx + (d < 0 ? 1 : -1)); });
+
+const hd = document.querySelector("header");
+addEventListener("scroll", () => {
+  const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  $("pg").style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+  hd.style.transform = "translateY(" + y * .3 + "px)"; hd.style.opacity = Math.max(0, 1 - y / 500);
+}, { passive: true });
 
 bar(); wall();
 </script>
