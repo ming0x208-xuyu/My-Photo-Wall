@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的照片墙</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="blobs"><i></i><i></i><i></i></div><div id="pg"></div><div id="dm"></div>
+<header><h1 id="t"></h1><p id="s"></p></header>
+<div class="bar" id="bar"></div>
+<main class="wall" id="wall"></main>
+<footer id="f"></footer>
+<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><img id="lbi" alt=""><div id="lbc"></div></div>
+
+<script>
+/* ========== 配置区：只需改这里 ========== */
+const SITE = { title: "我的照片墙", subtitle: "把值得记住的瞬间，挂在墙上" };
+const PHOTOS = [
+  // 把照片放进 photos 文件夹，然后按下面格式加一行：
+  // { src: "photos/sunset.jpg", title: "海边日落", tag: "旅行" },
+];
+
+// 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
+const DANMAKU = {
+  enabled: true,
+  gap: 1300, // 每条弹幕的发射间隔（毫秒），越小越密
+  texts: [
+    "愿你被这个世界温柔以待",
+    "把平凡的日子，过成值得回忆的样子",
+    "每一帧，都是时间留下的光",
+    "此刻，也终将成为珍贵的回忆",
+    "慢慢来，好看的风景都在路上",
+  ],
+};
+/* ====================================== */
+
+const $ = id => document.getElementById(id);
+let list = PHOTOS.slice(), cur = "全部", shown = [], idx = 0, io, dmOn = DANMAKU.enabled;
+document.title = SITE.title; [...SITE.title].forEach((c, i) => { const s = document.createElement("span"); s.className = "ch"; s.textContent = c === " " ? "\u00a0" : c; s.style.animationDelay = i * 90 + "ms"; $("t").appendChild(s); }); $("s").textContent = SITE.subtitle;
+$("f").textContent = "© " + new Date().getFullYear() + " " + SITE.title;
+
+if (!list.length) { // 没有照片时显示精致的示例占位图
+  const PAL = [["#f2d4c2", "#d08461", "#6e3a46"], ["#cddfee", "#6f93c2", "#27345e"], ["#dde7cf", "#8aa77c", "#33513f"],
+               ["#f1d1dc", "#c47c9b", "#51325f"], ["#ecdcb8", "#c39a4f", "#53401f"], ["#cfd3ea", "#8173c4", "#262345"]];
+  list = Array.from({ length: 16 }, (_, i) => {
+    const h = [320, 440, 540, 380, 480][i % 5], c = PAL[i % 6], n = String(i + 1).padStart(2, "0"), tag = ["旅行", "日常", "人像"][i % 3];
+    const g = (id, x, y, r, col) => `<radialGradient id='${id}' cx='${x}%' cy='${y}%' r='${r}%'><stop offset='0' stop-color='${col}'/><stop offset='1' stop-color='${col}' stop-opacity='0'/></radialGradient>`;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='${h}' viewBox='0 0 400 ${h}'><defs>${g("a", 82, 8, 85, c[0])}${g("b", 90, 60, 80, c[1])}${g("c", 25, 105, 100, c[2])}<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/></filter></defs>`
+      + `<rect width='400' height='${h}' fill='${c[1]}'/><rect width='400' height='${h}' fill='url(#c)'/><rect width='400' height='${h}' fill='url(#b)' opacity='.7'/><rect width='400' height='${h}' fill='url(#a)'/><rect width='400' height='${h}' filter='url(#n)'/>`
+      + `<rect x='14' y='14' width='372' height='${h - 28}' rx='8' fill='none' stroke='#fff' stroke-opacity='.4'/><line x1='32' y1='${h - 74}' x2='72' y2='${h - 74}' stroke='#fff' stroke-opacity='.7'/>`
+      + `<text x='32' y='52' fill='#fff' fill-opacity='.9' font-family='Georgia,serif' font-size='13' letter-spacing='5'>NO. ${n}</text>`
+      + `<text x='32' y='${h - 42}' fill='#fff' font-family='Georgia,serif' font-size='23' letter-spacing='4'>等待一张照片</text>`
+      + `<text x='32' y='${h - 22}' fill='#fff' fill-opacity='.75' font-family='Georgia,serif' font-size='11' letter-spacing='5'>${tag}</text></svg>`;
+    return { src: "data:image/svg+xml," + encodeURIComponent(svg), title: "示例 " + n, tag };
+  });
+}
+
+function bar() {
+  const tags = ["全部", ...new Set(list.map(p => p.tag).filter(Boolean))];
+  $("bar").innerHTML = "";
+  tags.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "chip" + (t === cur ? " on" : ""); b.textContent = t;
+    b.onclick = () => { cur = t; bar(); wall(); };
+    $("bar").appendChild(b);
+  });
+  const l = document.createElement("label");
+  l.className = "add"; l.title = "仅在本机预览，刷新后消失";
+  l.innerHTML = "＋ 本地预览<input type='file' accept='image/*' multiple>";
+  l.querySelector("input").onchange = e => {
+    [...e.target.files].forEach(f => list.unshift({ src: URL.createObjectURL(f), title: f.name.replace(/\.[^.]+$/, ""), tag: "本地预览" }));
+    bar(); wall();
+  };
+  if (DANMAKU.texts.length) {
+    const g = document.createElement("button");
+    g.className = "chip" + (dmOn ? " on" : ""); g.textContent = "弹幕";
+    g.onclick = () => { dmOn = !dmOn; $("dm").style.display = dmOn ? "" : "none"; g.classList.toggle("on", dmOn); };
+    $("bar").appendChild(g);
+  }
+  $("bar").appendChild(l);
+}
+
+function wall() {
+  shown = list.filter(p => cur === "全部" || p.tag === cur);
+  const w = $("wall"); w.innerHTML = "";
+  if (io) io.disconnect();
+  io = new IntersectionObserver(es => { // 同一批进入视野的卡片，按位置依次显现
+    es.filter(e => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
+      .forEach((e, k) => {
+        const d = e.target; io.unobserve(d);
+        d.style.transitionDelay = k * 120 + "ms"; d.classList.add("in");
+        setTimeout(() => { d.classList.add("done"); d.style.transitionDelay = ""; }, k * 120 + 1000);
+      });
+  }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
+  if (!shown.length) { w.innerHTML = "<div class='empty'>这里还没有照片</div>"; return; }
+  shown.forEach((p, i) => {
+    const d = document.createElement("figure");
+    d.className = "item"; d.style.setProperty("--r", (Math.random() * 6 - 3).toFixed(1) + "deg");
+    const im = new Image(); im.loading = "lazy"; im.alt = p.title || ""; im.src = p.src;
+    im.onload = () => im.classList.add("ok");
+    d.append(im);
+    if (p.title) { const c = document.createElement("div"); c.className = "cap"; c.textContent = p.title; d.append(c); }
+    d.onclick = () => open(i);
+    w.appendChild(d); io.observe(d);
+  });
+}
+
+function open(i) { idx = (i + shown.length) % shown.length; const p = shown[idx];
+  const im = $("lbi"); im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
+  im.src = p.src; $("lbc").textContent = (p.title || "") + "  " + (idx + 1) + " / " + shown.length;
+  $("lb").classList.add("on"); }
+const close = () => $("lb").classList.remove("on");
+$("x").onclick = close; $("pv").onclick = e => { e.stopPropagation(); open(idx - 1); };
+$("nx").onclick = e => { e.stopPropagation(); open(idx + 1); };
+$("lb").onclick = e => { if (e.target.id === "lb") close(); };
+addEventListener("keydown", e => { if (!$("lb").classList.contains("on")) return;
+  if (e.key === "Escape") close(); if (e.key === "ArrowLeft") open(idx - 1); if (e.key === "ArrowRight") open(idx + 1); });
+let sx = 0;
+$("lb").addEventListener("touchstart", e => sx = e.touches[0].clientX);
+$("lb").addEventListener("touchend", e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) open(idx + (d < 0 ? 1 : -1)); });
+
+const hd = document.querySelector("header");
+addEventListener("scroll", () => {
+  const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  $("pg").style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+  hd.style.transform = "translateY(" + y * .3 + "px)"; hd.style.opacity = Math.max(0, 1 - y / 500);
+}, { passive: true });
+
+function danmaku() {
+  const T = DANMAKU.texts.slice().sort(() => Math.random() - .5);
+  if (!T.length || matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const box = $("dm"), H = 46, N = Math.max(3, Math.floor(innerHeight * .7 / H)), busy = Array(N).fill(0);
+  let n = 0;
+  const fire = () => {
+    if (!dmOn || document.hidden) return;
+    const now = Date.now(), free = busy.map((t, i) => t < now ? i : -1).filter(i => i >= 0);
+    if (!free.length) return;
+    const lane = free[Math.random() * free.length | 0], sp = 70 + Math.random() * 50;
+    const el = document.createElement("div");
+    el.className = "dmk"; el.textContent = T[n++ % T.length];
+    el.style.top = "calc(9vh + " + lane * H + "px)"; el.style.fontSize = (14 + Math.random() * 5).toFixed(1) + "px";
+    box.appendChild(el);
+    const w = el.offsetWidth;
+    el.style.animationDuration = (innerWidth + w) / sp + "s";
+    busy[lane] = now + (w + 90) / sp * 1000;
+    el.onanimationend = () => el.remove();
+  };
+  setTimeout(() => { [0, 450, 950].forEach(d => setTimeout(fire, d)); setInterval(fire, DANMAKU.gap || 1300); }, 900);
+}
+
+bar(); wall(); danmaku();
+</script>
+</body>
+</html>
