@@ -53,7 +53,7 @@ if (!list.length) { // 没有照片时显示精致的示例占位图
   const PAL = [["#f2d4c2", "#d08461", "#6e3a46"], ["#cddfee", "#6f93c2", "#27345e"], ["#dde7cf", "#8aa77c", "#33513f"],
                ["#f1d1dc", "#c47c9b", "#51325f"], ["#ecdcb8", "#c39a4f", "#53401f"], ["#cfd3ea", "#8173c4", "#262345"]];
   list = Array.from({ length: 16 }, (_, i) => {
-    const h = [320, 440, 540, 380, 480][i % 5], c = PAL[i % 6], n = String(i + 1).padStart(2, "0"), tag = ["旅行", "日常", "宠物"][i % 3];
+    const h = [320, 440, 540, 380, 480][i % 5], c = PAL[i % 6], n = String(i + 1).padStart(2, "0"), tag = ["旅行", "日常", "人像"][i % 3];
     const g = (id, x, y, r, col) => `<radialGradient id='${id}' cx='${x}%' cy='${y}%' r='${r}%'><stop offset='0' stop-color='${col}'/><stop offset='1' stop-color='${col}' stop-opacity='0'/></radialGradient>`;
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='${h}' viewBox='0 0 400 ${h}'><defs>${g("a", 82, 8, 85, c[0])}${g("b", 90, 60, 80, c[1])}${g("c", 25, 105, 100, c[2])}<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/></filter></defs>`
       + `<rect width='400' height='${h}' fill='${c[1]}'/><rect width='400' height='${h}' fill='url(#c)'/><rect width='400' height='${h}' fill='url(#b)' opacity='.7'/><rect width='400' height='${h}' fill='url(#a)'/><rect width='400' height='${h}' filter='url(#n)'/>`
