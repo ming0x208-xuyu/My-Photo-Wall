@@ -56,3 +56,47 @@ footer{text-align:center;color:var(--mute);font-size:12px;padding:0 0 40px;lette
 #dl{position:absolute;top:16px;left:16px;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px;font:13px system-ui,sans-serif;letter-spacing:.06em;text-decoration:none;background:rgba(255,255,255,.1);opacity:.9}
 #dl:hover{background:var(--acc);border-color:var(--acc)}
 #dl[hidden]{display:none}
+#top{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;border:0;background:var(--acc);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28);opacity:0;transform:translateY(20px) scale(.8);pointer-events:none;transition:opacity .35s,transform .35s,box-shadow .2s}
+#top.show{opacity:1;transform:none;pointer-events:auto}
+#top.show:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.35)}
+/* 灯箱操作区、故事 */
+#acts{position:absolute;top:16px;left:16px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 70px);z-index:2}
+#acts a,#acts button{position:static;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px;font:13px system-ui,sans-serif;letter-spacing:.06em;text-decoration:none;background:rgba(255,255,255,.1);opacity:.9;cursor:pointer}
+#acts a:hover,#acts button:hover,#acts .lkb.on{background:var(--acc);border-color:var(--acc);opacity:1}
+#acts a[hidden]{display:none}
+#lb img#lbi{max-height:calc(100vh - 230px);max-height:calc(100dvh - 230px)}
+#lbc{max-width:min(92vw,620px)}
+#lbc .lt{font-size:17px;letter-spacing:.12em;color:#fff}
+#lbc .lm{margin-top:4px;font-size:12px;color:#aaa}
+#lbc .ls{margin-top:8px;line-height:1.8;font-size:14px;color:#ddd;letter-spacing:.06em;animation:fu .8s .2s both}
+#lbc .ln{margin-top:8px;font-size:12px;color:#888}
+#lbc div:empty{display:none}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}}
+/* 点赞 */
+.lkb{position:absolute;top:8px;right:8px;z-index:3;border:0;border-radius:999px;padding:4px 10px;font:12px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer;opacity:.92}
+.lkb.on{background:var(--acc)}
+.lkb.hp{animation:hp .45s}
+@keyframes hp{40%{transform:scale(1.4)}}
+/* 发弹幕输入框、访客弹幕 */
+#dmbox{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:min(92vw,460px);transform:translate(-50%,24px);display:flex;gap:8px;padding:8px;border-radius:999px;background:rgba(20,18,16,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);z-index:7;opacity:0;pointer-events:none;transition:.3s}
+#dmbox.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+#dmbox input{flex:1;min-width:0;border:0;outline:0;background:none;color:#fff;font:15px system-ui,sans-serif;padding:6px 14px}
+#dmbox button{border:0;border-radius:999px;background:var(--acc);color:#fff;padding:6px 18px;font:14px system-ui,sans-serif;cursor:pointer}
+.dmk.vis{background:rgba(40,60,90,.5)}
+.dmk.mine{background:rgba(192,113,74,.62);border-color:var(--acc);font-weight:600}
+#tools{padding-top:0}
+/* 拍立得桌面模式 */
+.wall.desk{columns:auto;position:relative;z-index:1;isolation:isolate}
+.desk .item{position:absolute;width:var(--w,200px);margin:0;padding:10px 10px 38px;background:#fbfaf7!important;border-radius:3px;aspect-ratio:auto!important;box-shadow:0 6px 22px rgba(0,0,0,.28);cursor:grab;overflow:visible;user-select:none}
+.desk .item.in{transform:rotate(var(--rot,0deg))}
+.desk .item.done:hover{transform:rotate(0deg) scale(1.07);z-index:50;box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.desk .item img{height:auto;aspect-ratio:var(--ar);object-fit:cover;pointer-events:none}
+.desk .cap{position:absolute;inset:auto 8px 10px;padding:0;background:none;color:#4a443d;text-align:center;opacity:1;font:14px "Segoe Script","Bradley Hand","Noto Serif SC",cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 彩蛋 */
+.fall{position:fixed;top:-120px;z-index:8;pointer-events:none;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:fall linear forwards}
+div.fall{box-shadow:none}
+@keyframes fall{to{transform:translateY(125vh) rotate(360deg)}}
+body.rb .wall,body.rb header{animation:hue 6s linear}
+@keyframes hue{to{filter:hue-rotate(360deg)}}
+.desk .item{-webkit-user-select:none;-webkit-touch-callout:none}
+.desk .item.lift{transform:rotate(0deg) scale(1.08);box-shadow:0 18px 44px rgba(0,0,0,.45);transition:transform .2s}

@@ -51,7 +51,10 @@ def main():
     cache = json.loads(CACHE.read_text("utf-8")) if CACHE.exists() else {}
     items, keep, made = [], set(), 0
 
-    for p in sorted(f for f in SRC.rglob("*") if f.is_file() and f.suffix.lower() in EXTS):
+    files = sorted(f for f in SRC.rglob("*") if f.is_file() and f.suffix.lower() in EXTS)
+    if not files:  # 防止在没有原图的电脑上运行时，把已生成的缩略图清空
+        sys.exit("photos 文件夹里没有照片，已取消，没有改动任何文件。")
+    for p in files:
         rel = p.relative_to(SRC)
         tag = rel.parts[0] if len(rel.parts) > 1 else ""
         stem = rel.with_suffix("")
@@ -105,6 +108,13 @@ def main():
         "// 此文件由 build.py 自动生成，请勿手动修改\n"
         f"window.PHOTOS_BUILT = [\n{body}\n];\n", encoding="utf-8")
     CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    if items:  # 分享卡片封面 og.jpg：优先用根目录的 cover.jpg，否则取最新一张照片，裁成 1200×630
+        try:
+            cover = ROOT / "cover.jpg"
+            im = Image.open(cover if cover.exists() else ROOT / items[0][1]["src"])
+            ImageOps.fit(ImageOps.exif_transpose(im).convert("RGB"), (1200, 630), Image.LANCZOS).save(ROOT / "og.jpg", quality=82)
+        except Exception as e:
+            print("og.jpg 生成失败：", e)
     cats = sorted({r["tag"] for _, r in items if r["tag"]})
     print(f"完成：共 {len(items)} 张照片（本次新处理 {made} 张），分类：{'、'.join(cats) or '无'}")
 
