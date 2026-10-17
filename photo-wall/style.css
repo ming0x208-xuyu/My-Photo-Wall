@@ -12,11 +12,11 @@ header p{color:var(--mute);margin-top:12px;letter-spacing:.2em;font-size:14px}
 .chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .add input{display:none}
 .wall{columns:4 240px;column-gap:14px;max-width:1360px;margin:0 auto;padding:0 14px 60px}
-.item{break-inside:avoid;margin-bottom:14px;border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in;background:var(--card);min-height:120px;opacity:0;transform:translateY(70px) scale(.9) rotate(var(--r,2deg));filter:blur(10px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
+.item{break-inside:avoid;margin-bottom:14px;border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in;background:var(--card);opacity:0;transform:translateY(70px) scale(.9) rotate(var(--r,2deg));filter:blur(10px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
 .item.in{opacity:1;transform:none;filter:none}
 .item.done{transition:transform .35s ease,box-shadow .35s ease}
 .item.done:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.3)}
-.item img{width:100%;display:block;opacity:0;transform:scale(1.2);transition:opacity .8s,transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.item img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.2);transition:opacity .8s,transform 1.4s cubic-bezier(.2,.7,.2,1)}
 .item.in img.ok{opacity:1;transform:none}
 .item.done:hover img.ok{transform:scale(1.07);transition:transform .6s}
 h1{perspective:600px}
@@ -50,3 +50,9 @@ footer{text-align:center;color:var(--mute);font-size:12px;padding:0 0 40px;lette
 #lb button{position:absolute;background:none;border:0;color:#fff;font-size:34px;cursor:pointer;opacity:.7;padding:14px}
 #lb button:hover{opacity:1}
 #x{top:6px;right:10px}#pv{left:6px;top:50%}#nx{right:6px;top:50%}
+.item:not([style*=aspect]){min-height:120px}
+#lbi{transition:filter .4s,opacity .4s}
+#lbi.ld{filter:blur(5px);opacity:.85}
+#dl{position:absolute;top:16px;left:16px;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px;font:13px system-ui,sans-serif;letter-spacing:.06em;text-decoration:none;background:rgba(255,255,255,.1);opacity:.9}
+#dl:hover{background:var(--acc);border-color:var(--acc)}
+#dl[hidden]{display:none}

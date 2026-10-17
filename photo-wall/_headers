@@ -1,0 +1,21 @@
+# Cloudflare Pages（Netlify 也通用）的响应头配置，必须放在网站根目录
+
+# 缩略图、高清图：文件名带内容哈希，可以缓存一年且永不过期
+/thumbs/*
+  Cache-Control: public, max-age=31536000, immutable
+/large/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 原图（仅用于下载）：缓存一天
+/photos/*
+  Cache-Control: public, max-age=86400
+
+# 页面、样式、照片清单：每次都向服务器确认是否有更新（没变化时只返回 304，很快）
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/style.css
+  Cache-Control: public, max-age=0, must-revalidate
+/photos.js
+  Cache-Control: public, max-age=0, must-revalidate

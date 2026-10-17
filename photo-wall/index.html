@@ -12,29 +12,23 @@
 <div class="bar" id="bar"></div>
 <main class="wall" id="wall"></main>
 <footer id="f"></footer>
-<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><img id="lbi" alt=""><div id="lbc"></div></div>
+<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><a id="dl" hidden>⤓ 下载原图</a><img id="lbi" alt=""><div id="lbc"></div></div>
 
+<script src="photos.js"></script>
 <script>
 /* ========== 配置区：只需改这里 ========== */
 const SITE = { title: "我的照片墙", subtitle: "把值得记住的瞬间，挂在墙上" };
+// 手动补充的照片（可选，一般不需要：用 build.py 自动生成即可）。tag 可以是 "旅行"，也可以是数组 ["旅行", "朋友"]
 const PHOTOS = [
-  // 把照片放进 photos 文件夹，然后按下面格式加一行：
   // { src: "photos/sunset.jpg", title: "海边日落", tag: "旅行" },
-  { src: "photos/2.jpg", title: "风景", tag: "旅行" },
-  { src: "photos/3.jpg", title:"风景", tag: "旅行" },
-  { src: "photos/4.jpg", title:"风景", tag: "旅行" },
-  { src: "photos/5.jpg", title:"风景", tag: "旅行" },
-  { src: "photos/6.jpg", title:"风景", tag: "旅行" },
-  { src: "photos/7.jpg", title:"风景", tag: "日常" },
-  { src: "photos/8.jpg", title:"宠物", tag: "日常" },
-  { src: "photos/furina1.png", title:"芙宁娜", tag: "人像" },
-  { src: "photos/furina2.png", title:"芙宁娜", tag: "人像" },
 ];
+// 分类按钮的显示顺序（可选）。分类就是 photos 下的子文件夹名；没写到的分类会排在后面
+const CATEGORY_ORDER = [];
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
 const DANMAKU = {
   enabled: true,
-  gap: 2600, // 每条弹幕的发射间隔（毫秒），越小越密
+  gap: 1600, // 每条弹幕的发射间隔（毫秒），越小越密
   texts: [
     "愿你被这个世界温柔以待",
     "把平凡的日子，过成值得回忆的样子",
@@ -46,7 +40,9 @@ const DANMAKU = {
 /* ====================================== */
 
 const $ = id => document.getElementById(id);
-let list = PHOTOS.slice(), cur = "全部", shown = [], idx = 0, io, dmOn = DANMAKU.enabled;
+const tagsOf = p => [].concat(p.tag || []);
+const u = s => /^(data|blob):/.test(s) ? s : s.split("/").map(encodeURIComponent).join("/"); // 路径转义，支持中文和空格
+let list = (window.PHOTOS_BUILT || []).concat(PHOTOS), cur = "全部", shown = [], idx = 0, io, lz, tok = 0, dmOn = DANMAKU.enabled;
 document.title = SITE.title; [...SITE.title].forEach((c, i) => { const s = document.createElement("span"); s.className = "ch"; s.textContent = c === " " ? "\u00a0" : c; s.style.animationDelay = i * 90 + "ms"; $("t").appendChild(s); }); $("s").textContent = SITE.subtitle;
 $("f").textContent = "© " + new Date().getFullYear() + " " + SITE.title;
 
@@ -62,12 +58,13 @@ if (!list.length) { // 没有照片时显示精致的示例占位图
       + `<text x='32' y='52' fill='#fff' fill-opacity='.9' font-family='Georgia,serif' font-size='13' letter-spacing='5'>NO. ${n}</text>`
       + `<text x='32' y='${h - 42}' fill='#fff' font-family='Georgia,serif' font-size='23' letter-spacing='4'>等待一张照片</text>`
       + `<text x='32' y='${h - 22}' fill='#fff' fill-opacity='.75' font-family='Georgia,serif' font-size='11' letter-spacing='5'>${tag}</text></svg>`;
-    return { src: "data:image/svg+xml," + encodeURIComponent(svg), title: "示例 " + n, tag };
+    return { src: "data:image/svg+xml," + encodeURIComponent(svg), w: 400, h, demo: true, title: "示例 " + n, tag };
   });
 }
 
 function bar() {
-  const tags = ["全部", ...new Set(list.map(p => p.tag).filter(Boolean))];
+  const all = [...new Set(list.flatMap(tagsOf))],
+    tags = ["全部", ...CATEGORY_ORDER.filter(t => all.includes(t)), ...all.filter(t => !CATEGORY_ORDER.includes(t))];
   $("bar").innerHTML = "";
   tags.forEach(t => {
     const b = document.createElement("button");
@@ -79,7 +76,7 @@ function bar() {
   l.className = "add"; l.title = "仅在本机预览，刷新后消失";
   l.innerHTML = "＋ 本地预览<input type='file' accept='image/*' multiple>";
   l.querySelector("input").onchange = e => {
-    [...e.target.files].forEach(f => list.unshift({ src: URL.createObjectURL(f), title: f.name.replace(/\.[^.]+$/, ""), tag: "本地预览" }));
+    [...e.target.files].forEach(f => list.unshift({ src: URL.createObjectURL(f), name: f.name, title: f.name.replace(/\.[^.]+$/, ""), tag: "本地预览" }));
     bar(); wall();
   };
   if (DANMAKU.texts.length) {
@@ -92,7 +89,7 @@ function bar() {
 }
 
 function wall() {
-  shown = list.filter(p => cur === "全部" || p.tag === cur);
+  shown = list.filter(p => cur === "全部" || tagsOf(p).includes(cur));
   const w = $("wall"); w.innerHTML = "";
   if (io) io.disconnect();
   io = new IntersectionObserver(es => { // 同一批进入视野的卡片，按位置依次显现
@@ -104,23 +101,39 @@ function wall() {
         setTimeout(() => { d.classList.add("done"); d.style.transitionDelay = ""; }, k * 120 + 1000);
       });
   }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
+  if (lz) lz.disconnect();
+  lz = new IntersectionObserver(es => es.forEach(e => { // 卡片进入视野（提前 600px）才开始下载缩略图
+    if (!e.isIntersecting) return;
+    lz.unobserve(e.target);
+    const im = e.target.querySelector("img"); im.src = im.dataset.src;
+  }), { rootMargin: "600px 0px" });
   if (!shown.length) { w.innerHTML = "<div class='empty'>这里还没有照片</div>"; return; }
   shown.forEach((p, i) => {
     const d = document.createElement("figure");
     d.className = "item"; d.style.setProperty("--r", (Math.random() * 6 - 3).toFixed(1) + "deg");
-    const im = new Image(); im.loading = "lazy"; im.alt = p.title || ""; im.src = p.src;
+    const im = new Image(); im.alt = p.title || ""; im.decoding = "async"; im.dataset.src = u(p.thumb || p.src);
     im.onload = () => im.classList.add("ok");
+    const known = p.w && p.h;
+    if (known) { d.style.aspectRatio = p.w + " / " + p.h; if (p.color) d.style.background = p.color; } // 先占好位置，避免加载时页面抖动
     d.append(im);
     if (p.title) { const c = document.createElement("div"); c.className = "cap"; c.textContent = p.title; d.append(c); }
     d.onclick = () => open(i);
     w.appendChild(d); io.observe(d);
+    if (known) lz.observe(d); else im.src = im.dataset.src;
   });
 }
 
-function open(i) { idx = (i + shown.length) % shown.length; const p = shown[idx];
-  const im = $("lbi"); im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
-  im.src = p.src; $("lbc").textContent = (p.title || "") + "  " + (idx + 1) + " / " + shown.length;
-  $("lb").classList.add("on"); }
+function open(i) {
+  idx = (i + shown.length) % shown.length;
+  const p = shown[idx], im = $("lbi"), my = ++tok, small = p.thumb || p.src, big = p.large || p.src;
+  im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
+  im.src = u(small); // 先显示已缓存的缩略图，高清图下载完再替换
+  im.classList.toggle("ld", big !== small);
+  if (big !== small) { const b = new Image(); b.onload = () => { if (my === tok) { im.src = u(big); im.classList.remove("ld"); } }; b.src = u(big); }
+  const dl = $("dl"); dl.hidden = !!p.demo; dl.href = u(p.src); dl.download = p.name || p.src.split("/").pop(); // 下载原图（保持原格式）
+  $("lbc").textContent = (p.title || "") + "  " + (idx + 1) + " / " + shown.length;
+  $("lb").classList.add("on");
+}
 const close = () => $("lb").classList.remove("on");
 $("x").onclick = close; $("pv").onclick = e => { e.stopPropagation(); open(idx - 1); };
 $("nx").onclick = e => { e.stopPropagation(); open(idx + 1); };
