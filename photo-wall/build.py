@@ -14,8 +14,11 @@
 """
 import hashlib
 import json
+import random
+import re
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 from PIL import Image, ImageOps
@@ -40,6 +43,59 @@ def shot_time(img, path):
     return time.strftime("%Y:%m:%d %H:%M:%S", time.localtime(path.stat().st_mtime))
 
 
+# ---------- 自动生成照片的标题 / 日期 / 小故事 / 拍摄参数（完全离线，不需要你手写）----------
+TOD = [(0, 5, "深夜", ["夜深了，世界安静得只剩下光。", "醒着的人，才看得到的风景。", "深夜里的一点光，格外珍贵。"]),
+       (5, 8, "清晨", ["天刚亮，世界还没完全醒来。", "晨光很轻，像怕吵醒谁。", "空气里带着刚醒来的凉意。"]),
+       (8, 11, "上午", ["阳光正好，一切都很清晰。", "慢慢展开的一天，从这一刻开始。", "光落在肩上，暖暖的。"]),
+       (11, 14, "正午", ["日头正高，世界亮得没有秘密。", "光线最直白的时刻，连影子都缩短了。", "明晃晃的一刻，却很安静。"]),
+       (14, 17, "午后", ["时间慢下来的午后，适合发呆。", "光线斜斜地落下来，很温柔。", "懒洋洋的时刻，什么都不用着急。"]),
+       (17, 19, "黄昏", ["傍晚的光把一切都染成了暖色。", "日落前最后的一点温柔。", "天色渐暗，灯火还没亮起的间隙。"]),
+       (19, 23, "夜晚", ["夜色降临，城市换了一种呼吸。", "灯光亮起来的时候，故事才刚开始。", "安静的夜，适合把今天留住。"]),
+       (23, 24, "深夜", ["夜深了，世界安静得只剩下光。", "醒着的人，才看得到的风景。", "深夜里的一点光，格外珍贵。"])]
+SEASON = ["冬", "冬", "春", "春", "春", "夏", "夏", "夏", "秋", "秋", "秋", "冬"]
+GENERIC = ["把这一刻，留在墙上。", "平凡的一天里，值得被记住的一瞬。", "没有特别的理由，只是想留下它。"]
+CAMERA_NAME = re.compile(r"^(IMG|DSC|DSCF|DSCN|PXL|MVIMG|DJI|WP|P\d|Screenshot|微信图片|mmexport|\d[\d_\-.]{5,})", re.I)
+
+
+def exif_info(img):
+    """读取 EXIF：拍摄时间、相机参数文字（不读取 GPS 位置）"""
+    dt, parts = None, []
+    try:
+        ex = img.getexif(); sub = ex.get_ifd(0x8769)
+        raw = sub.get(36867) or ex.get(306)
+        if raw:
+            dt = datetime.strptime(str(raw)[:19], "%Y:%m:%d %H:%M:%S")
+        if str(ex.get(272, "")).strip():
+            parts.append(str(ex.get(272)).strip())
+        if sub.get(37386):
+            parts.append(f"{float(sub.get(37386)):.0f}mm")
+        if sub.get(33437):
+            parts.append(f"f/{float(sub.get(33437)):.1f}")
+        if sub.get(33434):
+            e = float(sub.get(33434)); parts.append(f"1/{round(1 / e)}s" if 0 < e < 1 else f"{e:g}s")
+        if sub.get(34855):
+            iso = sub.get(34855); parts.append(f"ISO {iso[0] if isinstance(iso, tuple) else iso}")
+    except Exception:
+        pass
+    return dt, " · ".join(parts)
+
+
+def make_info(dt, cam, tag, stem, key):
+    rnd = random.Random(key)  # 用内容哈希做种子：同一张照片每次生成的文字都一样
+    info = {}
+    if CAMERA_NAME.match(stem):  # 相机默认文件名（IMG_1234）换成好听的标题
+        info["title"] = f"{tag or '瞬间'} · {dt.month}月{dt.day}日" if dt else (tag or "瞬间")
+    if dt:
+        name, pool = next((n, p) for a, z, n, p in TOD if a <= dt.hour < z)
+        info["date"] = dt.strftime("%Y-%m-%d")
+        info["text"] = f"{SEASON[dt.month - 1]}天的{name}。{rnd.choice(pool)}"
+    else:
+        info["text"] = rnd.choice(GENERIC)
+    if cam:
+        info["meta"] = cam
+    return info
+
+
 def save_webp(im, out, quality):
     out.parent.mkdir(parents=True, exist_ok=True)
     im.save(out, "WEBP", quality=quality, method=6)  # 不写入 EXIF，位置信息不会带进 WebP
@@ -62,6 +118,9 @@ def main():
         tpath = THUMB / stem.parent / f"{stem.name}.{digest}.webp"
         lpath = LARGE / stem.parent / f"{stem.name}.{digest}.webp"
         keep |= {tpath, lpath}
+        with Image.open(p) as probe:  # 只读文件头里的 EXIF，不解码图片，很快
+            dt, cam = exif_info(probe)
+        info = make_info(dt, cam, tag, stem.name, digest)
 
         meta = cache.get(digest)
         if not (meta and tpath.exists() and lpath.exists()):
@@ -87,7 +146,7 @@ def main():
             "thumb": tpath.relative_to(ROOT).as_posix(),
             "large": lpath.relative_to(ROOT).as_posix(),
             "w": meta["w"], "h": meta["h"],
-            "title": stem.name, "tag": tag, "color": meta["color"],
+            "title": stem.name, "tag": tag, "color": meta["color"], "info": info,
         }))
 
     # 清理已经不存在的照片对应的旧缩略图

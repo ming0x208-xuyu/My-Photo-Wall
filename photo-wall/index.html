@@ -14,15 +14,15 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="blobs"><i></i><i></i><i></i></div><div id="pg"></div><div id="dm"></div>
+<div class="blobs"><i></i><i></i><i></i></div><div id="deskbg"></div><div id="pg"></div><div id="dm"></div>
 <header><h1 id="t"></h1><p id="s"></p></header>
 <div class="bar" id="bar"></div>
-<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip" id="bDesk">✦ 桌面模式</button><button class="chip" id="bDm">✎ 发弹幕</button></div>
-<div id="dmbox"><input id="dmin" maxlength="30" placeholder="留一句话，飘在大家的屏幕上…"><button id="dmgo">发送</button></div>
+<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip" id="bDesk">✦ 桌面模式</button></div>
+<div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
 <main class="wall" id="wall"></main>
 <footer id="f"></footer>
 <button id="top" aria-label="回到顶部" title="回到顶部">↑</button>
-<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
+<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
 
 <script src="photos.js"></script>
 <script src="stories.js"></script>
@@ -38,7 +38,7 @@ const CATEGORY_ORDER = [];
 // 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
 const ORIGINALS_ONLINE = true;
 // 点赞与访客弹幕的后台地址（部署 worker.js 后得到，形如 "https://photowall-api.你的名字.workers.dev"）。留空 = 本地演示模式（只保存在访客自己的浏览器里）
-const API = "https://photowall-api.ming0x208.workers.dev";
+const API = "";
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
 const DANMAKU = {
@@ -57,8 +57,9 @@ const DANMAKU = {
 const $ = id => document.getElementById(id);
 const tagsOf = p => [].concat(p.tag || []);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x) e.textContent = x; return e; };
-const info = p => (window.STORIES || {})[p.src.replace(/^photos\//, "")] || (window.STORIES || {})[p.title] || p.info || {}; // 照片小故事
+const info = p => Object.assign({}, p.info, (window.STORIES || {})[p.src.replace(/^photos\//, "")] || (window.STORIES || {})[p.title]); // 照片小故事：build.py 自动生成，stories.js 可手动覆盖
 const pid = p => p.id || p.src;
+const fmtDate = d => (d || "").replace(/^(\d{4})-(\d+)-(\d+)$/, (m, y, mo, da) => y + "年" + +mo + "月" + +da + "日");
 const store = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} return null; };
 const DEMO_STORY = ["这天在海边等了两小时日落，云一直不散，最后收工前一分钟，光突然透出来了。", "路边随手拍的，后来发现是整趟旅行里我最喜欢的一张。", "朋友说我拍照时表情最认真，其实我只是在等一个对的光。", "那天风很大，帽子飞了，但笑声一直没停。", "下班路上看到的天色，忍不住停下来拍了一张。", "一杯咖啡，一段发呆的时间，刚刚好。"];
 const u = s => /^(data|blob):/.test(s) ? s : s.split("/").map(encodeURIComponent).join("/"); // 路径转义，支持中文和空格
@@ -101,13 +102,7 @@ function bar() {
     [...e.target.files].forEach(f => list.unshift({ src: URL.createObjectURL(f), name: f.name, title: f.name.replace(/\.[^.]+$/, ""), tag: "本地预览" }));
     bar(); wall();
   };
-  if (DANMAKU.texts.length) {
-    const g = document.createElement("button");
-    g.className = "chip" + (dmOn ? " on" : ""); g.textContent = "弹幕";
-    g.onclick = () => { dmOn = !dmOn; $("dm").style.display = dmOn ? "" : "none"; g.classList.toggle("on", dmOn); };
-    $("bar").appendChild(g);
-  }
-  $("bar").appendChild(l);
+  if (/admin/.test(location.search)) $("bar").appendChild(l); // 本地预览按钮仅站长可见：网址后加 ?admin
 }
 
 function wall() {
@@ -119,7 +114,7 @@ function wall() {
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
       .forEach((e, k) => {
         const d = e.target; io.unobserve(d);
-        d.style.transitionDelay = k * 120 + "ms"; d.classList.add("in");
+        d.style.transitionDelay = d.style.animationDelay = k * 120 + "ms"; d.classList.add("in");
         setTimeout(() => { d.classList.add("done"); d.style.transitionDelay = ""; }, k * 120 + 1000);
       });
   }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
@@ -140,28 +135,42 @@ function wall() {
     d.append(im);
     const tt = info(p).title || p.title;
     if (tt) { const c = document.createElement("div"); c.className = "cap"; c.textContent = tt; d.append(c); }
+    const dt = info(p).date; if (dt) d.append(el("div", "stamp", "'" + dt.slice(2).replace(/-/g, " "))); // 桌面模式的胶片日期戳
     const k = el("button", "lkb"); k._p = p; heart(k); k.onpointerdown = e => e.stopPropagation(); k.onclick = e => { e.stopPropagation(); toggleLike(p); }; d.append(k);
     d.onclick = () => { if (d._m) { d._m = false; return; } open(i, shown); };
     dragify(d);
     w.appendChild(d); io.observe(d);
     if (known) lz.observe(d); else im.src = im.dataset.src;
   });
-  if (desk) layoutDesk();
+  if (desk) layoutDesk(true);
 }
 
+function loadBig(p, my, src, tries) { // 后台下载高清图：失败自动重试、改用原图，15 秒还没好就不再模糊
+  const im = $("lbi"), b = new Image(); loadBig.keep = b; // 留住引用，避免被浏览器提前回收导致 onload 不触发
+  const done = ok => { if (my !== tok) return; $("lb").classList.remove("busy"); im.classList.remove("ld"); if (ok) im.src = u(src); };
+  b.onload = () => (b.decode ? b.decode().catch(() => {}) : Promise.resolve()).then(() => done(true));
+  b.onerror = () => {
+    if (my !== tok) return;
+    if (tries < 1) return setTimeout(() => loadBig(p, my, src, 1), 600);
+    if (ORIGINALS_ONLINE && p.src !== src) return loadBig(p, my, p.src, 1);
+    done(false);
+  };
+  b.src = u(src) + (tries ? "?r=" + Date.now() : "");
+  if (!tries) setTimeout(() => { if (my === tok) { im.classList.remove("ld"); $("lb").classList.remove("busy"); } }, 15000);
+}
 function open(i, arr) {
   if (arr) lbList = arr;
   idx = (i + lbList.length) % lbList.length;
   const p = lbList[idx], im = $("lbi"), my = ++tok, small = p.thumb || p.src, big = p.large || p.src, inf = info(p), badge = lbBadge; lbBadge = "";
   im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
   im.src = u(small); // 先显示已缓存的缩略图，高清图下载完再替换
-  im.classList.toggle("ld", big !== small);
-  if (big !== small) { const b = new Image(); b.onload = () => { if (my === tok) { im.src = u(big); im.classList.remove("ld"); } }; b.src = u(big); }
+  const need = big !== small; im.classList.toggle("ld", need); $("lb").classList.toggle("busy", need);
+  if (need) loadBig(p, my, big, 0);
   const dl = $("dl"), up = ORIGINALS_ONLINE || !p.large, file = up ? p.src : p.large;
   dl.hidden = !!p.demo; dl.href = u(file); dl.textContent = up ? "⤓ 下载原图" : "⤓ 下载高清图";
   dl.download = p.name || (up ? file.split("/").pop() : (p.title || "photo") + ".webp");
   $("pv").style.display = $("nx").style.display = lbList.length > 1 ? "" : "none";
-  $("lbc").replaceChildren(el("div", "lt", badge + (inf.title || p.title || "")), el("div", "lm", [inf.date, inf.place].filter(Boolean).join(" · ")), el("div", "ls", inf.text), el("div", "ln", (idx + 1) + " / " + lbList.length));
+  $("lbc").replaceChildren(el("div", "lt", badge + (inf.title || p.title || "")), el("div", "lm", [fmtDate(inf.date), inf.place].filter(Boolean).join(" · ")), el("div", "ls", inf.text), el("div", "lx", inf.meta), el("div", "ln", (idx + 1) + " / " + lbList.length));
   $("lk")._p = p; refreshLikes();
   $("lb").classList.add("on");
 }
@@ -225,7 +234,7 @@ function sendDm() {
   const inp = $("dmin"), t = inp.value.trim().slice(0, 30); if (!t) return;
   if (/https?:|www\.|微信|vx|加我/i.test(t)) { inp.value = ""; inp.placeholder = "不能包含链接或联系方式哦"; return; }
   if (Date.now() - lastSend < 8000) { inp.placeholder = "发得有点快，稍等几秒再发～"; return; }
-  lastSend = Date.now(); inp.value = ""; inp.placeholder = "留一句话，飘在大家的屏幕上…"; $("dmbox").classList.remove("on");
+  lastSend = Date.now(); inp.value = ""; inp.placeholder = "说点什么，飘给大家看…"; if (!dmOn) setDm(true);
   fireDm(t, 2); visitorDm.push(t);
   if (API) api("/danmaku", { text: t }); else store("pw-vdm", visitorDm.slice(-30));
 }
@@ -233,7 +242,6 @@ mine = store("pw-mine") || {};
 if (API) api("/").then(d => { if (d) { likes = d.likes || {}; visitorDm = (d.danmaku || []).map(x => x.t); refreshLikes(); } });
 else { likes = store("pw-likes") || {}; visitorDm = store("pw-vdm") || []; if (list.some(p => p.demo)) visitorDm = visitorDm.concat(["第一次来，好好看！", "这张好有感觉～", "路过，留个脚印 👣", "好想去这个地方！"]); }
 $("lk").onclick = () => toggleLike(lbList[idx]);
-$("bDm").onclick = () => { $("dmbox").classList.toggle("on"); if ($("dmbox").classList.contains("on")) $("dmin").focus(); };
 $("dmgo").onclick = sendDm; $("dmin").onkeydown = e => { if (e.key === "Enter") sendDm(); };
 
 /* ===== 每日一图 / 随机 / 分享 ===== */
@@ -245,49 +253,71 @@ $("sh").onclick = async () => {
 };
 { const h = decodeURIComponent(location.hash.slice(1)), p = h && list.find(x => pid(x) === h); if (p) setTimeout(() => open(0, [p]), 900); } // 分享链接直达这张照片
 
-/* ===== 拍立得桌面模式 ===== */
-function moveTo(d, x, y) { // 拖动：限制在桌面范围内，拖到下面时自动撑高桌面
-  const w = $("wall"); d.style.left = Math.min(Math.max(0, x), w.clientWidth - d.offsetWidth) + "px"; d.style.top = Math.max(0, y) + "px";
-  const need = d.offsetTop + d.offsetHeight + 60; if (need > w.offsetHeight) w.style.height = need + "px";
+/* ===== 弹幕开关 ===== */
+function setDm(on) { dmOn = on; $("dm").style.display = on ? "" : "none"; $("dmt").classList.toggle("on", on); }
+$("dmt").onclick = () => setDm(!dmOn); setDm(dmOn);
+
+/* ===== 拍立得桌面模式：整齐的吸附网格，拖到哪格就排到哪格，其他照片自动让位 ===== */
+let ord = [], slots = [];
+function layoutDesk(init) {
+  const w = $("wall"), W = w.clientWidth, iw = W < 600 ? 150 : 200, cols = Math.max(1, Math.floor(W / (iw + 28))), cw = W / cols, rh = iw + 66;
+  if (init || ord.length !== w.children.length) { ord = [...w.children]; init = true; }
+  slots = ord.map((_, k) => ({ x: (k % cols) * cw + (cw - iw) / 2, y: 30 + (k / cols | 0) * rh }));
+  ord.forEach((d, k) => {
+    if (init) { d.style.setProperty("--rot", (Math.random() * 8 - 4).toFixed(1) + "deg"); d.style.setProperty("--tape", (Math.random() * 10 - 5).toFixed(1) + "deg"); }
+    d.style.setProperty("--w", iw + "px"); d.style.left = slots[k].x + "px"; d.style.top = slots[k].y + "px";
+  });
+  w.style.height = Math.ceil(ord.length / cols) * rh + 90 + "px";
 }
+function dragMove(d, x, y) { // x、y：照片左上角的目标位置
+  const w = $("wall"), dw = d.offsetWidth, dh = d.offsetHeight;
+  x = Math.min(Math.max(0, x), w.clientWidth - dw); y = Math.min(Math.max(0, y), w.offsetHeight - dh);
+  d.style.left = x + "px"; d.style.top = y + "px";
+  let t = 0, best = 1e12;
+  slots.forEach((s, k) => { const dd = (s.x - x) ** 2 + (s.y - y) ** 2; if (dd < best) { best = dd; t = k; } });
+  const cur = ord.indexOf(d);
+  if (t !== cur) { // 拖到别的格子：插入到那一格，其余照片顺序让位
+    ord.splice(cur, 1); ord.splice(t, 0, d);
+    ord.forEach((e, k) => { if (e !== d) { e.style.left = slots[k].x + "px"; e.style.top = slots[k].y + "px"; } });
+  }
+}
+function dragEnd(d) { d.classList.remove("dragging"); const s = slots[ord.indexOf(d)]; d.style.left = s.x + "px"; d.style.top = s.y + "px"; } // 松手：吸附进格子
 function dragify(d) {
   d.onpointerdown = e => { // 电脑：按住鼠标拖动
     if (!desk || e.pointerType === "touch") return;
     d._m = false; const sx = e.clientX, sy = e.clientY, ox = d.offsetLeft, oy = d.offsetTop;
-    d.style.zIndex = ++z; d.setPointerCapture(e.pointerId);
-    const mv = ev => { if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) > 5) d._m = true; moveTo(d, ox + ev.clientX - sx, oy + ev.clientY - sy); };
-    const up = () => { d.removeEventListener("pointermove", mv); d.removeEventListener("pointerup", up); };
+    d.style.zIndex = ++z; d.classList.add("dragging"); d.setPointerCapture(e.pointerId);
+    const mv = ev => { if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) > 5) d._m = true; dragMove(d, ox + ev.clientX - sx, oy + ev.clientY - sy); };
+    const up = () => { d.removeEventListener("pointermove", mv); d.removeEventListener("pointerup", up); dragEnd(d); };
     d.addEventListener("pointermove", mv); d.addEventListener("pointerup", up);
   };
-  let s, lp; // 手机：长按约 0.25 秒后照片“浮起”，随后可随意拖动；不长按就是正常上下翻页
+  let s, lp; // 手机：长按约 0.25 秒后照片浮起，随后可拖动；不长按就是正常上下翻页
   d.addEventListener("touchstart", e => {
     if (!desk || e.target.closest(".lkb")) return;
     d._m = false; d._drag = false; const t = e.touches[0]; s = { x: t.clientX, y: t.clientY, ox: d.offsetLeft, oy: d.offsetTop };
-    clearTimeout(lp); lp = setTimeout(() => { d._drag = true; d.style.zIndex = ++z; d.classList.add("lift"); navigator.vibrate && navigator.vibrate(12); }, 250);
+    clearTimeout(lp); lp = setTimeout(() => { d._drag = true; d.style.zIndex = ++z; d.classList.add("dragging"); navigator.vibrate && navigator.vibrate(12); }, 250);
   }, { passive: true });
   d.addEventListener("touchmove", e => {
     if (!s) return; const t = e.touches[0], dx = t.clientX - s.x, dy = t.clientY - s.y;
     if (!d._drag) { if (Math.abs(dx) + Math.abs(dy) > 8) clearTimeout(lp); return; }
-    e.preventDefault(); d._m = true; moveTo(d, s.ox + dx, s.oy + dy);
+    e.preventDefault(); d._m = true; dragMove(d, s.ox + dx, s.oy + dy);
   }, { passive: false });
-  const end = () => { clearTimeout(lp); d._drag = false; d.classList.remove("lift"); s = null; };
+  const end = () => { clearTimeout(lp); if (d._drag) dragEnd(d); d._drag = false; s = null; };
   d.addEventListener("touchend", end); d.addEventListener("touchcancel", end);
 }
-function layoutDesk() {
-  const w = $("wall"), W = w.clientWidth, iw = W < 600 ? 150 : 210, cols = Math.max(1, Math.floor(W / (iw * .8))), gx = cols > 1 ? (W - iw) / (cols - 1) : 0, rowH = iw * 1.15;
-  [...w.children].forEach((d, k) => {
-    const c = k % cols, r = k / cols | 0, x = (cols > 1 ? c * gx : (W - iw) / 2) + (Math.random() - .5) * iw * .25;
-    d.style.setProperty("--w", iw + "px"); d.style.setProperty("--rot", (Math.random() * 16 - 8).toFixed(1) + "deg");
-    d.style.left = Math.min(Math.max(0, x), W - iw) + "px"; d.style.top = 16 + r * rowH + (Math.random() - .5) * 36 + "px";
-  });
-  w.style.height = Math.ceil(shown.length / cols) * rowH + iw * 1.4 + "px";
-}
-$("bDesk").onclick = () => {
-  desk = !desk; $("bDesk").textContent = desk ? "▦ 瀑布流" : "✦ 桌面模式"; wall();
-  if (desk) fireDm(matchMedia("(pointer:coarse)").matches ? "长按照片，就可以随意拖动啦" : "按住照片，可以随意拖动～", 2);
+$("bDesk").onclick = () => { // 切换：先淡出，再换成另一种摆法
+  const w = $("wall"); w.style.transition = "opacity .3s"; w.style.opacity = 0;
+  setTimeout(() => {
+    desk = !desk; document.body.classList.toggle("deskmode", desk); $("bDesk").textContent = desk ? "▦ 瀑布流" : "✦ 桌面模式"; wall(); w.style.opacity = 1;
+    if (desk) fireDm(matchMedia("(pointer:coarse)").matches ? "长按照片，就可以拖动啦；松手会自动吸附排好" : "按住照片拖动，松手会自动吸附排好～", 2);
+  }, 320);
 };
-let rt, lw = innerWidth; // 只有宽度变了才重新摆放（手机滚动时地址栏伸缩也会触发 resize，不能因此打乱你拖好的位置）
+let rt, lw = innerWidth, rafm; // 只有宽度变了才重新排（手机地址栏伸缩也会触发 resize）
 addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (innerWidth !== lw) { lw = innerWidth; if (desk && shown.length) layoutDesk(); } }, 200); });
+addEventListener("pointermove", e => { // 桌面模式的暖色聚光灯跟随鼠标
+  if (!desk || rafm) return;
+  rafm = requestAnimationFrame(() => { rafm = 0; document.body.style.setProperty("--mx", e.clientX + "px"); document.body.style.setProperty("--my", e.clientY + "px"); });
+});
 
 /* ===== 彩蛋：连点标题 5 下 = 照片雨；键盘输入 ↑↑↓↓←→←→BA = 烟花 + 变色 ===== */
 function rain(kind) {
