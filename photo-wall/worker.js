@@ -1,5 +1,6 @@
 // 照片墙后台：点赞 + 访客弹幕（Cloudflare Worker + KV）
 // 部署：新建 Worker → 粘贴本文件 → Settings → Bindings 添加 KV namespace，变量名必须叫 KV
+// 访问：推荐给 Worker 添加路由 你的域名/api/*（和网站同一个域名，国内访问更稳），网页里 API 填 "/api"
 const BAD_WORDS = [];                                              // 想屏蔽的词，例如 ["某某词"]
 const BAD_PATTERN = /https?:|www\.|\.com|\.cn|微信|vx|加我|qq/i;   // 屏蔽链接、广告、联系方式
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type" };
@@ -20,7 +21,7 @@ export default {
     try {
       const get = async (k, d) => JSON.parse((await env.KV.get(k)) || "null") ?? d;
       const put = (k, v) => env.KV.put(k, JSON.stringify(v)).catch(() => {}); // 免费版同一个 key 每秒只能写 1 次，超了就忽略
-      const ip = req.headers.get("CF-Connecting-IP") || "?", path = new URL(req.url).pathname.replace(/\/+$/, "");
+      const ip = req.headers.get("CF-Connecting-IP") || "?", path = new URL(req.url).pathname.replace(/\/+$/, "").replace(/^\/api(?=\/|$)/, ""); // 兼容 /api/like 和 /like
 
       if (req.method === "GET") return json({ ok: true, likes: await get("likes", {}), danmaku: (await get("danmaku", [])).slice(-60) });
       if (req.method !== "POST") return json({ error: "bad method" }, 405);

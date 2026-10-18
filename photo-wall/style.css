@@ -99,7 +99,7 @@ body.dg #spot{opacity:0}
 .desk .item.done{animation:none;transition:translate .6s cubic-bezier(.2,.9,.3,1.12),transform .45s cubic-bezier(.2,.9,.3,1.2),box-shadow .35s}
 .desk .item.done:hover{transform:rotate(0deg) scale(1.06) translateY(-4px);z-index:50;box-shadow:0 2px 2px rgba(0,0,0,.25),0 12px 24px rgba(0,0,0,.35),0 34px 70px rgba(0,0,0,.45)}
 .desk .item.done.dragging{transform:rotate(0deg) scale(1.1);cursor:grabbing;transition:transform .25s,box-shadow .25s;will-change:transform,translate;box-shadow:0 24px 48px rgba(0,0,0,.5)}
-@keyframes drop{0%{opacity:0;transform:translateY(-140px) rotate(calc(var(--rot,0deg) + 16deg)) scale(1.18)}55%{opacity:1;transform:translateY(10px) rotate(calc(var(--rot,0deg) - 3deg)) scale(.98)}78%{transform:translateY(-3px) rotate(calc(var(--rot,0deg) + 1deg))}100%{opacity:1;transform:rotate(var(--rot,0deg))}}
+@keyframes drop{0%{opacity:0;transform:translateY(-90px) rotate(calc(var(--rot,0deg) + 12deg)) scale(1.05)}55%{opacity:1;transform:translateY(10px) rotate(calc(var(--rot,0deg) - 3deg)) scale(.98)}78%{transform:translateY(-3px) rotate(calc(var(--rot,0deg) + 1deg))}100%{opacity:1;transform:rotate(var(--rot,0deg))}}
 .desk .item img{height:auto;aspect-ratio:1/1;object-fit:cover;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);filter:contrast(1.03) saturate(1.06)}
 .desk .item .cap{position:absolute;inset:auto 10px 8px;padding:0;background:none;color:#4b443b;text-align:center;opacity:1;font:15px "Segoe Script","Bradley Hand","Noto Serif SC",cursive;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stamp{display:none}
@@ -147,3 +147,21 @@ body.rb .wall,body.rb header{animation:hue 6s linear}
 #vsw svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #vth{position:absolute;top:4px;bottom:4px;left:4px;width:var(--tw,0);border-radius:999px;background:var(--acc);transform:translateX(var(--tx,0));transition:transform .45s cubic-bezier(.3,1.3,.5,1),width .45s;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media(max-width:600px){#vsw{right:10px}#vsw button{padding:8px 11px}#vsw button span{display:none}}
+/* 修复：桌面模式下页面横向被撑宽，导致画面晃动、右上角开关被顶出屏幕 */
+html{overflow-x:hidden;overscroll-behavior-x:none}
+.wall{overflow-x:clip}
+.desk .item img{transform:none}
+/* 左上角：放映按钮（与右上角视图开关对称） */
+#vpl{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;z-index:8;display:flex;padding:4px;border-radius:999px;background:rgba(24,21,18,.58);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px rgba(0,0,0,.28);opacity:0;animation:fade 1s 1.4s forwards}
+#vpl button{display:flex;align-items:center;gap:6px;border:0;background:none;color:#fff;padding:7px 14px;border-radius:999px;font:13px system-ui,sans-serif;letter-spacing:.08em;cursor:pointer;transition:background .3s}
+#vpl button:hover{background:var(--acc)}
+#vpl svg{width:15px;height:15px;fill:currentColor}
+@media(max-width:600px){#vpl{left:10px}#vpl button{padding:8px 11px}#vpl button span{display:none}}
+/* 放映模式 */
+@keyframes kb{0%{opacity:0;transform:scale(1)}10%{opacity:1}100%{opacity:1;transform:scale(1.09)}}
+#lbi.kb{animation:kb 5.6s ease-out both}
+#lb.paused #lbi.kb,#lb.paused #lbp{animation-play-state:paused}
+#lbp{display:none;position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--acc);transform-origin:left;transform:scaleX(0)}
+#lb.show #lbp{display:block;animation:lbp 5.2s linear both}
+@keyframes lbp{to{transform:scaleX(1)}}
+#lb.show #acts,#lb.show #pv,#lb.show #nx{opacity:0;pointer-events:none}

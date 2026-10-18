@@ -21,10 +21,11 @@
 <div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
 <main class="wall" id="wall"></main>
 <footer id="f"></footer>
-<button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
+<button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vpl"><button id="play" title="放映"><svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg><span>放映</span></button></div>
+<div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
 <button id="vWall" class="on" title="瀑布流"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="10" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="6" rx="1.5"/><rect x="3.5" y="16.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="12.5" width="7" height="8" rx="1.5"/></svg><span>瀑布流</span></button>
 <button id="vDesk" title="桌面模式"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="11" height="12" rx="1.5" transform="rotate(-9 9 12)"/><rect x="10" y="5" width="11" height="12" rx="1.5" transform="rotate(8 15.5 11)"/></svg><span>桌面</span></button></div><div id="toast"></div>
-<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
+<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><i id="lbp"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
 
 <script src="photos.js"></script>
 <script src="stories.js"></script>
@@ -39,8 +40,8 @@ const PHOTOS = [
 const CATEGORY_ORDER = [];
 // 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
 const ORIGINALS_ONLINE = true;
-// 点赞与访客弹幕的后台地址（部署 worker.js 后得到，形如 "https://photowall-api.你的名字.workers.dev"）。留空 = 本地演示模式（只保存在访客自己的浏览器里）
-const API = "https://photowall-api.ming0x208.workers.dev/";
+// 点赞与访客弹幕的后台地址。也可以填完整网址，例如 "https://api.你的域名.com"
+const API = "/api"; // 推荐："/api"（给 Worker 添加路由 你的域名/api/*，和网站同域，国内也能用）。留空 = 本地演示模式
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
 const DANMAKU = {
@@ -67,6 +68,7 @@ const DEMO_STORY = ["这天在海边等了两小时日落，云一直不散，�
 const u = s => /^(data|blob):/.test(s) ? s : s.split("/").map(encodeURIComponent).join("/"); // 路径转义，支持中文和空格
 let list = (window.PHOTOS_BUILT || []).concat(PHOTOS), cur = "全部", shown = [], idx = 0, io, lz, tok = 0, dmOn = DANMAKU.enabled,
   lbList = [], lbBadge = "", desk = false, z = 10, lastSend = 0, likes = {}, mine = {}, visitorDm = [], fireDm = () => {};
+let playing = false, paused = false, pt = 0;
 document.title = SITE.title; [...SITE.title].forEach((c, i) => { const s = document.createElement("span"); s.className = "ch"; s.textContent = c === " " ? "\u00a0" : c; s.style.animationDelay = i * 90 + "ms"; $("t").appendChild(s); }); $("s").textContent = SITE.subtitle;
 $("f").textContent = "© " + new Date().getFullYear() + " " + SITE.title;
 
@@ -156,7 +158,7 @@ function open(i, arr) {
   if (arr) lbList = arr;
   idx = (i + lbList.length) % lbList.length;
   const p = lbList[idx], im = $("lbi"), my = ++tok, small = p.thumb || p.src, big = p.large || p.src, inf = info(p), badge = lbBadge; lbBadge = "";
-  im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
+  im.classList.remove("pop", "kb"); void im.offsetWidth; im.classList.add(playing ? "kb" : "pop"); // 放映时用缓慢推近的效果
   im.src = u(small); // 先显示已缓存的缩略图，高清图下载完再替换
   const need = big !== small; im.classList.toggle("ld", need); $("lb").classList.toggle("busy", need);
   if (need) loadBig(p, my, big, 0);
@@ -167,8 +169,10 @@ function open(i, arr) {
   $("lbc").replaceChildren(el("div", "lt", badge + (inf.title || p.title || "")), el("div", "lm", [fmtDate(inf.date), inf.place].filter(Boolean).join(" · ")), el("div", "ls", inf.text), el("div", "lx", inf.meta), el("div", "ln", (idx + 1) + " / " + lbList.length));
   $("lk")._p = p; refreshLikes();
   $("lb").classList.add("on");
+  clearTimeout(pt); const pb = $("lbp"); pb.style.animation = "none"; void pb.offsetWidth; pb.style.animation = "";
+  if (playing && !paused) pt = setTimeout(() => open(idx + 1), 5200); // 放映：5 秒后自动下一张
 }
-const close = () => $("lb").classList.remove("on");
+const close = () => { $("lb").classList.remove("on", "show", "paused"); playing = paused = false; clearTimeout(pt); };
 $("x").onclick = close; $("pv").onclick = e => { e.stopPropagation(); open(idx - 1); };
 $("nx").onclick = e => { e.stopPropagation(); open(idx + 1); };
 $("lb").onclick = e => { if (e.target.id === "lb") close(); };
@@ -217,7 +221,8 @@ function danmaku() {
 /* ===== 点赞 / 访客弹幕 ===== */
 async function api(path, body) { // 没配置 API 时返回 null，页面自动用本地演示模式
   if (!API) return null;
-  try { const r = await fetch(API.replace(/\/+$/, "") + path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}); return await r.json(); } catch (e) { return null; }
+  const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 6000); // 6 秒没响应就放弃，不让页面一直等
+  try { const r = await fetch(API.replace(/\/+$/, "") + path, Object.assign({ signal: ac.signal }, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {})); return await r.json(); } catch (e) { return null; } finally { clearTimeout(tm); }
 }
 const cnt = p => (likes[pid(p)] || 0) + (p.likes0 || 0);
 function heart(b) { const p = b._p; if (!p) return; const n = cnt(p), on = !!mine[pid(p)]; b.textContent = (on ? "♥" : "♡") + (n ? " " + n : ""); b.classList.toggle("on", on); }
@@ -347,6 +352,18 @@ addEventListener("pointermove", e => { // 桌面模式的暖色聚光灯：只�
   if (!desk || rafm || e.pointerType === "touch") return;
   rafm = requestAnimationFrame(() => { rafm = 0; $("spot").style.transform = "translate3d(" + e.clientX + "px," + e.clientY + "px,0)"; });
 });
+
+/* ===== 放映（幻灯片）：自动轮播当前分类的照片，缓慢推近 ===== */
+$("play").onclick = () => {
+  const arr = shown.length ? shown : list; if (!arr.length) return;
+  playing = true; paused = false; $("lb").classList.add("show"); $("lb").classList.remove("paused");
+  open(0, arr); toast("放映中：点击画面暂停，按 Esc 退出");
+};
+$("lbi").onclick = e => {
+  if (!playing) return; e.stopPropagation(); paused = !paused; $("lb").classList.toggle("paused", paused); clearTimeout(pt);
+  if (!paused) pt = setTimeout(() => open(idx + 1), 800); toast(paused ? "已暂停" : "继续放映");
+};
+addEventListener("keydown", e => { if (playing && e.key === " " && e.target.tagName !== "INPUT") { e.preventDefault(); $("lbi").click(); } });
 
 /* ===== 彩蛋：连点标题 5 下 = 照片雨；键盘输入 ↑↑↓↓←→←→BA = 烟花 + 变色 ===== */
 function rain(kind) {
