@@ -23,6 +23,7 @@ export default {
       const put = (k, v) => env.KV.put(k, JSON.stringify(v)).catch(() => {}); // 免费版同一个 key 每秒只能写 1 次，超了就忽略
       const ip = req.headers.get("CF-Connecting-IP") || "?", path = new URL(req.url).pathname.replace(/\/+$/, "").replace(/^\/api(?=\/|$)/, ""); // 兼容 /api/like 和 /like
 
+      if (req.method === "GET" && path === "/messages") return json({ ok: true, messages: await get("danmaku", []) }); // 留言板：全部留言
       if (req.method === "GET") return json({ ok: true, likes: await get("likes", {}), danmaku: (await get("danmaku", [])).slice(-60) });
       if (req.method !== "POST") return json({ error: "bad method" }, 405);
       let body; try { body = await req.json(); } catch { return json({ error: "bad json" }, 400); }
@@ -36,11 +37,11 @@ export default {
         await put("likes", likes); return json({ ok: true });
       }
       if (path === "/danmaku") {
-        const text = String(body.text || "").trim().slice(0, 30);
+        const text = String(body.text || "").trim().slice(0, 80);
         if (!text || BAD_PATTERN.test(text) || BAD_WORDS.some(w => text.includes(w))) return json({ ok: false, error: "bad" });
         if (limited(ip, "dm", 10000)) return json({ ok: false, error: "rate" });
         const list = await get("danmaku", []); list.push({ t: text, ts: Date.now() });
-        await put("danmaku", list.slice(-100)); return json({ ok: true });
+        await put("danmaku", list.slice(-300)); return json({ ok: true });
       }
       return json({ error: "not found" }, 404);
     } catch (e) { return json({ error: String(e) }, 500); }

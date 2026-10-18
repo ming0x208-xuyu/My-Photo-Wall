@@ -19,3 +19,9 @@
   Cache-Control: public, max-age=0, must-revalidate
 /photos.js
   Cache-Control: public, max-age=0, must-revalidate
+/stories.js
+  Cache-Control: public, max-age=0, must-revalidate
+/og.jpg
+  Cache-Control: public, max-age=86400
+/fonts/*
+  Cache-Control: public, max-age=2592000
