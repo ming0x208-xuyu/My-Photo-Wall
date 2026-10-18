@@ -17,11 +17,13 @@
 <div class="blobs"><i></i><i></i><i></i></div><div id="deskbg"></div><div id="spot"></div><div id="pg"></div><div id="dm"></div>
 <header><h1 id="t"></h1><p id="s"></p></header>
 <div class="bar" id="bar"></div>
-<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip" id="bDesk">✦ 桌面模式</button></div>
+<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button></div>
 <div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
 <main class="wall" id="wall"></main>
 <footer id="f"></footer>
-<button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="toast"></div>
+<button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
+<button id="vWall" class="on" title="瀑布流"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="10" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="6" rx="1.5"/><rect x="3.5" y="16.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="12.5" width="7" height="8" rx="1.5"/></svg><span>瀑布流</span></button>
+<button id="vDesk" title="桌面模式"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="11" height="12" rx="1.5" transform="rotate(-9 9 12)"/><rect x="10" y="5" width="11" height="12" rx="1.5" transform="rotate(8 15.5 11)"/></svg><span>桌面</span></button></div><div id="toast"></div>
 <div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
 
 <script src="photos.js"></script>
@@ -38,7 +40,7 @@ const CATEGORY_ORDER = [];
 // 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
 const ORIGINALS_ONLINE = true;
 // 点赞与访客弹幕的后台地址（部署 worker.js 后得到，形如 "https://photowall-api.你的名字.workers.dev"）。留空 = 本地演示模式（只保存在访客自己的浏览器里）
-const API = "";
+const API = "https://photowall-api.ming0x208.workers.dev/";
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
 const DANMAKU = {
@@ -95,14 +97,6 @@ function bar() {
     b.onclick = () => { cur = t; bar(); wall(); };
     $("bar").appendChild(b);
   });
-  const l = document.createElement("label");
-  l.className = "add"; l.title = "仅在本机预览，刷新后消失";
-  l.innerHTML = "＋ 本地预览<input type='file' accept='image/*' multiple>";
-  l.querySelector("input").onchange = e => {
-    [...e.target.files].forEach(f => list.unshift({ src: URL.createObjectURL(f), name: f.name, title: f.name.replace(/\.[^.]+$/, ""), tag: "本地预览" }));
-    bar(); wall();
-  };
-  if (/admin/.test(location.search)) $("bar").appendChild(l); // 本地预览按钮仅站长可见：网址后加 ?admin
 }
 
 function wall() {
@@ -334,13 +328,19 @@ function dragify(d) {
   const end = () => { clearTimeout(lp); if (d._drag) dragEnd(d); d._drag = false; s = null; };
   d.addEventListener("touchend", end); d.addEventListener("touchcancel", end);
 }
-$("bDesk").onclick = () => { // 切换：先淡出，再换成另一种摆法
+let vWant = false; // 视图开关：瀑布流 ⇄ 桌面
+function syncV() { const b = $(vWant ? "vDesk" : "vWall"), t = $("vth"); t.style.setProperty("--tx", b.offsetLeft - 4 + "px"); t.style.setProperty("--tw", b.offsetWidth + "px"); }
+function setView(toDesk) { // 先淡出，再换成另一种摆法
+  if (toDesk === vWant) return;
+  vWant = toDesk; $("vWall").classList.toggle("on", !toDesk); $("vDesk").classList.toggle("on", toDesk); syncV();
   const w = $("wall"); w.style.transition = "opacity .3s"; w.style.opacity = 0;
   setTimeout(() => {
-    desk = !desk; document.body.classList.toggle("deskmode", desk); $("bDesk").textContent = desk ? "▦ 瀑布流" : "✦ 桌面模式"; wall(); w.style.opacity = 1;
+    desk = toDesk; document.body.classList.toggle("deskmode", desk); wall(); w.style.opacity = 1;
     if (desk) fireDm(matchMedia("(pointer:coarse)").matches ? "长按照片，就可以拖动啦；松手会自动吸附排好" : "按住照片拖动，松手会自动吸附排好～", 2);
   }, 320);
-};
+}
+$("vWall").onclick = () => setView(false); $("vDesk").onclick = () => setView(true);
+addEventListener("resize", syncV); syncV(); setTimeout(syncV, 400);
 let rt, lw = innerWidth, rafm; // 只有宽度变了才重新排（手机地址栏伸缩也会触发 resize）
 addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (innerWidth !== lw) { lw = innerWidth; if (desk && shown.length) layoutDesk(); } }, 200); });
 addEventListener("pointermove", e => { // 桌面模式的暖色聚光灯：只移动一个独立图层，不会拖慢页面
