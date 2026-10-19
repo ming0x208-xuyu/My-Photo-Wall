@@ -15,17 +15,22 @@
 </head>
 <body>
 <div class="blobs"><i></i><i></i><i></i></div><div id="deskbg"></div>
-<svg id="wm" viewBox="0 0 64 76" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18V6h12M46 6h12v12M58 46v12H46M18 58H6V46" stroke-width="1.2"/><path d="M17 46V21l15 16 15-16v25" stroke-width="2.3"/><circle cx="32" cy="24" r="5.6" stroke-width=".8" opacity=".6"/><circle class="wd" cx="32" cy="24" r="2.6" fill="currentColor" stroke="none"/></g><text x="32" y="71" text-anchor="middle" font-size="5.2" letter-spacing="1.7" fill="currentColor" font-family="ui-monospace,Menlo,Consolas,monospace">MPHOTOWALL</text></svg><div id="spot"></div><div id="pg"></div><div id="dm"></div>
+<svg id="wm" viewBox="0 0 83 92" aria-hidden="true">
+<g fill="none" stroke="currentColor"><circle cx="41.5" cy="41.5" r="38" stroke-width=".9"/><circle class="wr" cx="41.5" cy="41.5" r="33.6" stroke-width="2.4" stroke-dasharray=".6 2.62"/><path class="wk" d="M60 11v10M55 16h10" stroke-width=".9" stroke-linecap="round"/></g>
+<g fill="currentColor"><rect x="21.5" y="28" width="2.2" height="28"/><polygon points="21.5,28 27.2,28 42.4,56 36.7,56"/><polygon points="57,28 59.4,28 43.4,56 41,56"/><rect x="57" y="28" width="5" height="28"/><rect x="17.5" y="27" width="10" height="1.5"/><rect x="53" y="27" width="13" height="1.5"/><rect x="17.5" y="55" width="10" height="1.5"/><rect x="53" y="55" width="13" height="1.5"/><circle class="wd" cx="41.5" cy="36.5" r="3.4"/></g>
+<text x="41.5" y="89.5" text-anchor="middle" font-size="5" letter-spacing="1.5" fill="currentColor" font-family="ui-monospace,Menlo,Consolas,monospace">MPHOTOWALL</text></svg><div id="spot"></div><div id="pg"></div><div id="dm"></div>
 <header><h1 id="t"></h1><p id="te"></p><p id="s"></p></header>
 <div class="bar" id="bar"></div>
 <div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button></div>
 <div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
 <main class="wall" id="wall"></main>
+<div id="more"><p class="mz">更多的故事即将到来~</p><p class="me">More stories are on the way</p></div>
 <footer id="f"></footer>
 <button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vpl"><button id="bdBtn" title="拾光邮局 · Light Post"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>拾光邮局</span><b id="vcnt" hidden></b></button></div>
 <div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
 <button id="vWall" class="on" title="瀑布流"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="10" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="6" rx="1.5"/><rect x="3.5" y="16.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="12.5" width="7" height="8" rx="1.5"/></svg><span>瀑布流</span></button>
 <button id="vDesk" title="桌面模式"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="11" height="12" rx="1.5" transform="rotate(-9 9 12)"/><rect x="10" y="5" width="11" height="12" rx="1.5" transform="rotate(8 15.5 11)"/></svg><span>桌面</span></button></div><div id="toast"></div>
+<div id="curtain"></div>
 <section id="board" aria-label="拾光邮局 Light Post"><div class="bb"><i></i><i></i><i></i></div><div class="grain"></div>
 <button id="bback" aria-label="返回">← 返回照片墙</button>
 <div class="bscroll"><div class="bh"><p class="mono">// light post · est. 2026</p><h2>拾光邮局</h2><p class="mono" id="bsub"></p></div><div id="bgrid"></div><p id="bempty" class="mono" hidden>还没有来信，写下第一封吧 ✉<br>No letters yet — be the first to write</p></div>
@@ -190,8 +195,8 @@ const hd = document.querySelector("header");
 addEventListener("scroll", () => {
   const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
   $("top").classList.toggle("show", y > innerHeight); // 下滑超过一屏才显示
-  const isl = y > innerHeight * (document.body.classList.contains("isl") ? .85 : 1); // 手机：超过一屏后顶部按钮并拢成“岛”（带回滞，避免来回抖）
-  if (isl !== document.body.classList.contains("isl")) { document.body.classList.toggle("isl", isl); islandSync(); }
+  document.body.classList.toggle("isl", y > innerHeight * (document.body.classList.contains("isl") ? .85 : 1)); // 手机：超过一屏后顶部按钮变成低调样式（带回滞，避免来回抖）
+  document.body.classList.add("sc"); clearTimeout(scT); scT = setTimeout(() => document.body.classList.remove("sc"), 650); // 正在滚动时更淡
   $("rp").style.strokeDashoffset = 131.95 * (1 - (h > 0 ? y / h : 0)); // 圆环 = 阅读进度
   $("pg").style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
   hd.style.transform = "translateY(" + y * .3 + "px)"; hd.style.opacity = Math.max(0, 1 - y / 500);
@@ -242,7 +247,7 @@ function toggleLike(p) {
 }
 let tto; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tto); tto = setTimeout(() => t.classList.remove("on"), 2600); }
 const seenDm = new Set();
-function updCnt() { const n = msgs.length, c = $("vcnt"); c.textContent = n > 99 ? "99+" : n; c.hidden = !n; islandSync(); }
+function updCnt() { const n = msgs.length, c = $("vcnt"); c.textContent = n > 99 ? "99+" : n; c.hidden = !n; }
 function submitMsg(raw) { // 弹幕输入框和拾光邮局共用：校验 → 本地立刻显示 → 异步保存到后台
   const t = raw.trim().slice(0, 80); if (!t) return false;
   if (/https?:|www\.|微信|vx|加我/i.test(t)) { toast("不能包含链接或联系方式哦"); return false; }
@@ -379,35 +384,44 @@ function envMarkup(e, m) { // 一个信封：信封体 / 信纸 / 封口翻盖 /
 }
 function renderBoard() {
   const g = $("bgrid"), arr = msgs.slice().sort((a, b) => b.ts - a.ts); g.replaceChildren();
-  arr.forEach((m, i) => { const e = el("button", "env" + (m.fresh ? " fresh" : "")); e.style.setProperty("--i", Math.min(i, 20)); envMarkup(e, m); e.onclick = () => readLetter(m, e); g.append(e); delete m.fresh; });
+  arr.forEach((m, i) => { const e = el("button", "env" + (m.fresh ? " fresh" : "") + (i > 9 ? " na" : "")); e.style.setProperty("--i", Math.min(i, 20)); envMarkup(e, m); e.onclick = () => readLetter(m, e); g.append(e); delete m.fresh; });
   $("bempty").hidden = !!arr.length; $("bsub").textContent = "// " + arr.length + " 封来信 · " + arr.length + " letters · 新 → 旧";
 }
-let bA = null, bOpen = false, popIgnore = 0; // bA：圆形展开动画（进度 0=收起，1=展开；正放=展开，倒放=收回）；bOpen：当前想要的状态
-function startReveal() {
-  const r = $("bdBtn").getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, R = Math.hypot(innerWidth, innerHeight) + 20;
-  if (bA) bA.cancel();
-  bA = $("board").animate([{ clipPath: "circle(0px at " + x + "px " + y + "px)" }, { clipPath: "circle(" + R + "px at " + x + "px " + y + "px)" }],
-    { duration: matchMedia("(prefers-reduced-motion:reduce)").matches ? 1 : 950, easing: "cubic-bezier(.75,0,.2,1)", fill: "both" });
-  const a = bA; a.onfinish = () => { if (a === bA && a.playbackRate < 0) hideBoard(); }; // 倒放结束 = 完全收回
+let bTok = 0, bOpen = false, popIgnore = 0; // bTok：每次开/关加 1，过期的动画回调自动作废，连点也不会错乱
+const reduceMo = () => matchMedia("(prefers-reduced-motion:reduce)").matches;
+const anim = (e, kf, o) => { const a = e.animate(kf, Object.assign({ fill: "both" }, o)); return a.finished.catch(() => {}); };
+function curtainSet() { // 以按钮为圆心铺一块刚好盖住全屏的圆形幕布（固定大小，只缩放，不会重新排版）
+  const r = $("bdBtn").getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 4, c = $("curtain");
+  c.getAnimations().forEach(a => a.cancel());
+  Object.assign(c.style, { left: x - R + "px", top: y - R + "px", width: 2 * R + "px", height: 2 * R + "px", display: "block" }); return c;
 }
-function hideBoard() { $("board").classList.remove("on"); document.documentElement.classList.remove("noscroll"); if (bA) { bA.cancel(); bA = null; } }
-async function openBoard() {
-  if (bOpen) return; bOpen = true; const b = $("board");
-  if (bA && b.classList.contains("on")) bA.reverse(); // 正在收回时又点开：从当前位置接着展开，不会卡住
-  else { b.classList.add("on"); document.documentElement.classList.add("noscroll"); b.querySelector(".bscroll").scrollTop = 0; renderBoard(); startReveal(); }
+async function openBoard() { // 幕布从按钮处铺满全屏（此时后面悄悄准备好页面）→ 幕布淡出，内容依次浮现
+  if (bOpen) return; bOpen = true; const tk = ++bTok, b = $("board"), c = curtainSet();
+  // 透明度用 .001 而不是 0：浏览器会跳过完全透明的元素，等到显示那一刻才第一次绘制，会卡一下；
+  // 入场动画在幕布后面就带着延迟开始排队，揭幕那一刻不再有集中的计算
+  b.classList.remove("rv"); b.style.opacity = .001; b.classList.add("on", "rv");
+  document.documentElement.classList.add("noscroll"); b.querySelector(".bscroll").scrollTop = 0; renderBoard();
   if (location.hash === "#board") history.replaceState({ board: 0 }, "", "#board"); else history.pushState({ board: 1 }, "", "#board");
-  if (API) { // 打开时再向后台要一份完整的留言列表
+  await anim(c, [{ transform: "scale(.02)" }, { transform: "scale(1)" }], { duration: reduceMo() ? 1 : 620, easing: "cubic-bezier(.65,0,.25,1)" });
+  if (tk !== bTok) return; b.style.opacity = "";
+  await anim(c, [{ opacity: 1 }, { opacity: 0 }], { duration: reduceMo() ? 1 : 460, easing: "ease-out" });
+  if (tk !== bTok) return; c.getAnimations().forEach(a => a.cancel()); c.style.display = "none";
+  if (API) { // 再向后台要一份完整的留言列表
     const r = await api("/messages");
-    if (r && r.messages && r.messages.length !== msgs.length) {
-      msgs = r.messages.map(x => ({ t: x.t, ts: x.ts || Date.now() })); msgs.forEach(m => { if (!seenDm.has(m.t)) { seenDm.add(m.t); visitorDm.push(m.t); } }); updCnt(); if (bOpen) renderBoard();
+    if (r && r.messages && r.messages.length !== msgs.length && bOpen) {
+      msgs = r.messages.map(x => ({ t: x.t, ts: x.ts || Date.now() })); msgs.forEach(m => { if (!seenDm.has(m.t)) { seenDm.add(m.t); visitorDm.push(m.t); } }); updCnt(); renderBoard();
     }
   }
 }
-function doClose() {
-  if (!bOpen) return; bOpen = false; closeLetter(true);
-  if (bA) bA.reverse(); else hideBoard(); // 倒放圆形动画 = 收回
+async function doClose() { // 幕布盖住内容 → 页面悄悄复原 → 幕布缩回按钮
+  if (!bOpen) return; bOpen = false; const tk = ++bTok, b = $("board"), c = curtainSet(); closeLetter(true);
+  await anim(c, [{ transform: "scale(1)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: reduceMo() ? 1 : 240 });
+  if (tk !== bTok) return; b.classList.remove("on", "rv"); b.style.opacity = ""; document.documentElement.classList.remove("noscroll");
+  await anim(c, [{ transform: "scale(1)" }, { transform: "scale(.02)" }], { duration: reduceMo() ? 1 : 560, easing: "cubic-bezier(.65,0,.25,1)" });
+  if (tk !== bTok) return; c.getAnimations().forEach(a => a.cancel()); c.style.display = "none";
 }
 function closeBoard() { // 先立刻收回画面，再回退掉打开时加的那条历史记录
+  if (!bOpen) return;
   const had = history.state && history.state.board; doClose();
   if (had) { popIgnore++; history.back(); } else if (location.hash === "#board") history.replaceState(null, "", location.pathname + location.search);
 }
@@ -433,15 +447,10 @@ $("bgo").onclick = sendLetter; $("bin").onkeydown = e => { if (e.key === "Enter"
 addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("ltr").classList.contains("on")) closeLetter(); else if ($("board").classList.contains("on")) closeBoard(); });
 if (location.hash === "#board") setTimeout(openBoard, 700);
 
-/* ===== 手机顶部“岛”：左右两个胶囊并拢到屏幕中间 ===== */
-function islandSync() {
-  const l = $("vpl"), r = $("vsw");
-  if (!document.body.classList.contains("isl") || innerWidth > 600) { l.style.setProperty("--ix", "0px"); r.style.setProperty("--ix", "0px"); return; }
-  const wl = l.offsetWidth, wr = r.offsetWidth, gap = 6, x0 = (document.documentElement.clientWidth - (wl + gap + wr)) / 2;
-  l.style.setProperty("--ix", x0 - l.offsetLeft + "px");
-  r.style.setProperty("--ix", x0 + wl + gap + wr - (r.offsetLeft + wr) + "px");
-}
-addEventListener("resize", islandSync);
+let scT; // 手机顶部按钮：滚动时更淡
+
+/* ===== 页面最底部：更多的故事即将到来~（滚到时浮现） ===== */
+new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { threshold: .5 }).observe($("more"));
 
 /* ===== 彩蛋：连点标题 5 下 = 照片雨；键盘输入 ↑↑↓↓←→←→BA = 烟花 + 变色 ===== */
 function rain(kind) {

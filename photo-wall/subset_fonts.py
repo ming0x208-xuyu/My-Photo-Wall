@@ -20,7 +20,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent
 FONTS = ROOT / "fonts"
-EXTRA_ZH = "拾光邮局来信封寄出我的照片墙"  # 页面里其它用到标题字体的文字（邮局标题等）
+EXTRA_ZH = "拾光邮局来信封寄出我的照片墙更多的故事即将到来"  # 页面里其它用到标题字体的文字（邮局标题等）
 EN_TEXT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,-·&'!?:"
 
 
