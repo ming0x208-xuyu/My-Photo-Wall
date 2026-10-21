@@ -1,0 +1,16 @@
+/* 魔法书：首页的塔罗入口与塔罗页开场共用（纯 CSS 3D，不使用图片） */
+.bk{--w:150px;position:relative;width:var(--w);height:calc(var(--w) * 1.28);perspective:800px;pointer-events:none}
+.bk-3d{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(16deg) rotateY(-28deg);animation:bk-f 5.5s ease-in-out infinite}
+@keyframes bk-f{50%{transform:rotateX(10deg) rotateY(-18deg) translateY(-8px)}}
+.bk-3d>*{position:absolute;inset:0;border-radius:3px 9px 9px 3px}
+.bk-back{background:linear-gradient(135deg,#20174a,#0f0a28);transform:translateZ(-10px);box-shadow:0 22px 44px rgba(0,0,0,.55)}
+.bk-pg{inset:4px 4px 4px 3px;border-radius:2px 6px 6px 2px;background:repeating-linear-gradient(180deg,#f5ecd7 0 2px,#d8ccb0 2px 3px)}
+.bk-pg.p1{transform:translateZ(-6px)}.bk-pg.p2{transform:translateZ(-2px)}
+.bk-pg.p3{transform:translateZ(3px);background:radial-gradient(circle at 50% 45%,#fff8de,#f0dfb2);transition:box-shadow 1s}
+.bk-cover{transform-origin:left center;transform:translateZ(9px);transition:transform 1.2s cubic-bezier(.6,0,.2,1);background:linear-gradient(135deg,#34257c,#170f3b);border:1px solid rgba(236,210,154,.55);box-shadow:inset 0 0 0 5px rgba(236,210,154,.08),0 0 24px rgba(120,90,255,.35)}
+.bk-cover svg{position:absolute;inset:8%;width:84%;height:84%;fill:none;stroke:#ecd29a;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
+.bk.open .bk-cover{transform:translateZ(9px) rotateY(-160deg)}
+.bk.open .bk-pg.p3{box-shadow:0 0 46px 14px rgba(255,222,150,.75)}
+.bk-halo{position:absolute;inset:-48%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(130,100,255,.55),rgba(130,100,255,0));animation:bk-h 3.8s ease-in-out infinite}
+@keyframes bk-h{50%{transform:scale(1.16);opacity:.7}}
+@media(prefers-reduced-motion:reduce){.bk-3d,.bk-halo{animation:none}}

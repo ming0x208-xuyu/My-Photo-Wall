@@ -11,7 +11,9 @@
 <meta property="og:image" content="https://mphotowall.com/og.jpg">
 <meta property="og:url" content="https://mphotowall.com/">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="book.css">
 <link rel="stylesheet" href="style.css">
+<script>try{if(sessionStorage.getItem("pwBack")==="1")document.documentElement.classList.add("pwback")}catch(e){}</script>
 </head>
 <body>
 <div class="blobs"><i></i><i></i><i></i></div><div id="deskbg"></div>
@@ -19,13 +21,17 @@
 <g fill="none" stroke="currentColor"><circle cx="41.5" cy="41.5" r="38" stroke-width=".9"/><circle class="wr" cx="41.5" cy="41.5" r="33.6" stroke-width="2.4" stroke-dasharray=".6 2.62"/><path class="wk" d="M60 11v10M55 16h10" stroke-width=".9" stroke-linecap="round"/></g>
 <g fill="currentColor"><rect x="21.5" y="28" width="2.2" height="28"/><polygon points="21.5,28 27.2,28 42.4,56 36.7,56"/><polygon points="57,28 59.4,28 43.4,56 41,56"/><rect x="57" y="28" width="5" height="28"/><rect x="17.5" y="27" width="10" height="1.5"/><rect x="53" y="27" width="13" height="1.5"/><rect x="17.5" y="55" width="10" height="1.5"/><rect x="53" y="55" width="13" height="1.5"/><circle class="wd" cx="41.5" cy="36.5" r="3.4"/></g>
 <text x="41.5" y="89.5" text-anchor="middle" font-size="5" letter-spacing="1.5" fill="currentColor" font-family="ui-monospace,Menlo,Consolas,monospace">MPHOTOWALL</text></svg><div id="spot"></div><div id="pg"></div><div id="dm"></div>
+<div id="pgw">
 <header><h1 id="t"></h1><p id="te"></p><p id="s"></p></header>
 <div class="bar" id="bar"></div>
-<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button></div>
-<div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
+<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip magic" id="bTarot">🔮 塔罗</button></div>
 <main class="wall" id="wall"></main>
-<div id="more"><p class="mz">更多的故事即将到来~</p><p class="me">More stories are on the way</p></div>
+<div id="more"><p class="mz">更多的故事即将到来~</p><p class="me">More stories are on the way</p>
+<button id="tarotGate" class="gate" aria-label="命运之书 · 塔罗占卜"><span class="orbit"><i style="--k:0">✦</i><i style="--k:1">☾</i><i style="--k:2">✧</i><i style="--k:3">☉</i><i style="--k:4">✦</i><i style="--k:5">☽</i></span><div class="bk"><div class="bk-3d"><i class="bk-back"></i><i class="bk-pg p1"></i><i class="bk-pg p2"></i><i class="bk-pg p3"></i><div class="bk-cover"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="36"/><circle cx="50" cy="50" r="30" stroke-dasharray="1 3"/><path d="M50.0 24.0L53.8 40.8L68.4 31.6L59.2 46.2L76.0 50.0L59.2 53.8L68.4 68.4L53.8 59.2L50.0 76.0L46.2 59.2L31.6 68.4L40.8 53.8L24.0 50.0L40.8 46.2L31.6 31.6L46.2 40.8Z"/><path d="M88.0 50.0L96.0 50.0M86.7 59.8L91.5 61.1M82.9 69.0L89.8 73.0M76.9 76.9L80.4 80.4M69.0 82.9L73.0 89.8M59.8 86.7L61.1 91.5M50.0 88.0L50.0 96.0M40.2 86.7L38.9 91.5M31.0 82.9L27.0 89.8M23.1 76.9L19.6 80.4M17.1 69.0L10.2 73.0M13.3 59.8L8.5 61.1M12.0 50.0L4.0 50.0M13.3 40.2L8.5 38.9M17.1 31.0L10.2 27.0M23.1 23.1L19.6 19.6M31.0 17.1L27.0 10.2M40.2 13.3L38.9 8.5M50.0 12.0L50.0 4.0M59.8 13.3L61.1 8.5M69.0 17.1L73.0 10.2M76.9 23.1L80.4 19.6M82.9 31.0L89.8 27.0M86.7 40.2L91.5 38.9"/><path d="M50 40a10 10 0 1 0 0 20a6 10 0 1 1 0-20z" stroke-opacity=".0"/><circle cx="50" cy="50" r="3" fill="#ecd29a" stroke="none"/></svg></div></div><b class="bk-halo"></b></div><span class="gt">命运之书</span><span class="ge">Book of Fate · Tarot</span><span class="gh">轻触，翻开今日的牌</span></button>
+<p id="fp" class="fp" hidden>已有 <b id="fpn">0</b> 人在此留下足迹 👣</p></div>
 <footer id="f"></footer>
+</div>
+<div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
 <button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vpl"><button id="bdBtn" title="拾光邮局 · Light Post"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>拾光邮局</span><b id="vcnt" hidden></b></button></div>
 <div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
 <button id="vWall" class="on" title="瀑布流"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="10" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="6" rx="1.5"/><rect x="3.5" y="16.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="12.5" width="7" height="8" rx="1.5"/></svg><span>瀑布流</span></button>
@@ -52,6 +58,7 @@ const CATEGORY_ORDER = [];
 // 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
 const ORIGINALS_ONLINE = true;
 // 点赞与访客弹幕的后台地址。也可以填完整网址，例如 "https://api.你的域名.com"
+const TAROT_URL = "tarot.html"; // 塔罗占卜页面
 const API = "/api"; // 推荐："/api"（给 Worker 添加路由 你的域名/api/*，和网站同域，国内也能用）。留空 = 本地演示模式
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
@@ -260,19 +267,30 @@ function submitMsg(raw) { // 弹幕输入框和拾光邮局共用：校验 → �
 }
 function sendDm() { const inp = $("dmin"); if (submitMsg(inp.value)) { inp.value = ""; inp.blur(); } }
 mine = store("pw-mine") || {};
+/* ===== 足迹：已有 N 人在此留下足迹（服务器按 IP 去重，每个 IP 只记一次） ===== */
+let fpVal = 0, fpDone = 0;
+const fpIO = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting || fpDone) return; fpDone = 1; fpIO.disconnect();
+  const t0 = performance.now(), n = $("fpn"), step = t => { const k = Math.min(1, (t - t0) / 1300); n.textContent = Math.round(fpVal * (1 - Math.pow(1 - k, 3))).toLocaleString("zh-CN"); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}), { threshold: .6 });
+function showFp(n) { n = Math.floor(+n); if (!(n > 0)) return; fpVal = n; $("fp").hidden = false; if (fpDone) $("fpn").textContent = n.toLocaleString("zh-CN"); else fpIO.observe($("fp")); }
 const DEMO_MSGS = ["第一次来，好好看！", "这张好有感觉～", "路过，留个脚印 👣", "好想去这个地方！", "光线太温柔了，像一封写给夏天的信", "朋友推荐来的，已经收藏了！", "每一张都像电影截图", "谢谢你把日子拍得这么好看", "夜里刷到这里，莫名被治愈了"];
 function applyState(d, first) { // 同步服务器上的点赞数和访客弹幕；新来的弹幕立刻飘出来
-  if (d.likes) likes = d.likes; refreshLikes();
+  if (d.likes) likes = d.likes; refreshLikes(); if (d.visitors != null) showFp(d.visitors);
   const fresh = [];
   (d.danmaku || []).forEach(x => { if (seenDm.has(x.t)) return; seenDm.add(x.t); visitorDm.push(x.t); msgs.push({ t: x.t, ts: x.ts || Date.now() }); if (!first) fresh.push(x.t); });
   fresh.slice(-4).forEach((t, i) => setTimeout(() => fireDm(t, 3), i * 900)); updCnt();
 }
-if (API) { const pull = first => api("/").then(d => d && !d.error && applyState(d, first)); pull(true); setInterval(() => { if (!document.hidden) pull(false); }, 30000); }
+if (API) { const pull = first => api("/").then(d => d && !d.error && applyState(d, first)); pull(true); setInterval(() => { if (!document.hidden) pull(false); }, 30000);
+  if (!store("pw-visited")) api("/visit", {}).then(r => { if (r && r.ok) { store("pw-visited", 1); showFp(r.count); } }); // 记一次足迹
+}
 else {
   likes = store("pw-likes") || {};
   msgs = (store("pw-vdm") || []).map(x => typeof x === "string" ? { t: x, ts: Date.now() - 864e5 } : x);
   if (list.some(p => p.demo)) msgs = msgs.concat(DEMO_MSGS.map((t, k) => ({ t, ts: Date.now() - (k * 1.7 + .3) * 864e5, demo: 1 })));
   visitorDm = msgs.map(m => m.t); msgs.forEach(m => seenDm.add(m.t)); updCnt();
+  if (list.some(p => p.demo)) showFp(1286); // 演示数字
 }
 $("lk").onclick = () => toggleLike(lbList[idx]);
 $("dmgo").onclick = sendDm; $("dmin").onkeydown = e => { if (e.key === "Enter") sendDm(); };
@@ -452,25 +470,52 @@ let scT; // 手机顶部按钮：滚动时更淡
 /* ===== 页面最底部：更多的故事即将到来~（滚到时浮现） ===== */
 new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { threshold: .5 }).observe($("more"));
 
-/* ===== 彩蛋：连点标题 5 下 = 照片雨；键盘输入 ↑↑↓↓←→←→BA = 烟花 + 变色 ===== */
-function rain(kind) {
-  const pics = list.slice().sort(() => Math.random() - .5);
-  for (let k = 0; k < (kind === 1 ? 18 : 60); k++) {
-    const e = kind === 1 ? el("img", "fall") : el("div", "fall", ["🎉", "✨", "💖", "🎊", "⭐"][k % 5]);
-    if (kind === 1) { const p = pics[k % pics.length]; e.src = u(p.thumb || p.src); e.style.width = 60 + Math.random() * 70 + "px"; } else e.style.fontSize = 18 + Math.random() * 22 + "px";
-    e.style.left = Math.random() * 100 + "vw"; e.style.animationDuration = 3 + Math.random() * 3 + "s"; e.style.animationDelay = Math.random() * 1.2 + "s";
-    document.body.appendChild(e); e.onanimationend = () => e.remove();
-  }
-}
-let tc = 0, tt1, ki = 0;
-$("t").onclick = () => { clearTimeout(tt1); if (++tc >= 5) { tc = 0; rain(1); fireDm("📷 照片雨来啦！", 2); } tt1 = setTimeout(() => tc = 0, 1200); };
+/* ===== 烟花彩蛋：连点标题 5 下，或输入 ↑↑↓↓←→←→BA（大合唱版） ===== */
+let fxP, tc = 0, tt1, ki = 0, showing = 0, entering = false;
+const loadFx = () => fxP || (fxP = new Promise((ok, no) => { if (window.FX) return ok(window.FX); const sc = document.createElement("script"); sc.src = "fx.js"; sc.onload = () => ok(window.FX); sc.onerror = no; document.head.appendChild(sc); })); // 用到才下载
+const fire = finale => { if (showing) return; showing = 1; loadFx().then(F => F.fireworks({ finale })).catch(() => {}).then(() => { showing = 0; }); };
+$("t").onclick = () => { clearTimeout(tt1); if (++tc >= 5) { tc = 0; fire(false); fireDm("🎆 烟花为你绽放～", 2); } tt1 = setTimeout(() => tc = 0, 1200); };
 const KON = "ArrowUp,ArrowUp,ArrowDown,ArrowDown,ArrowLeft,ArrowRight,ArrowLeft,ArrowRight,b,a".split(",");
 addEventListener("keydown", e => {
   const k = e.key.length > 1 ? e.key : e.key.toLowerCase();
   ki = k === KON[ki] ? ki + 1 : (k === KON[0] ? 1 : 0);
-  if (ki === KON.length) { ki = 0; rain(2); document.body.classList.add("rb"); setTimeout(() => document.body.classList.remove("rb"), 6000); fireDm("🎉 你找到了隐藏彩蛋！", 2); }
+  if (ki === KON.length) { ki = 0; fire(true); fireDm("🎉 你找到了隐藏彩蛋！", 2); }
 });
-console.log("%c悄悄告诉你：连点标题 5 下试试 📷", "color:#c0714a;font-size:14px");
+console.log("%c悄悄告诉你：连点标题 5 下试试 🎆", "color:#c0714a;font-size:14px");
+
+/* ===== 命运之书入口：被魔法书吸进去 → 进入塔罗页（页面整体旋转着缩进书里） ===== */
+async function enterTarot() {
+  if (entering || bOpen) return; entering = true;
+  const go = () => { try { sessionStorage.setItem("pwTarot", "1"); } catch (e) {} location.href = TAROT_URL; };
+  if (reduceMo()) return go();
+  const gate = $("tarotGate"), bk = gate.querySelector(".bk"), g = bk.getBoundingClientRect(), vis = g.bottom > 40 && g.top < innerHeight - 40;
+  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, fx = loadFx().catch(() => null), clone = bk.cloneNode(true);
+  clone.style.cssText = "position:fixed;z-index:34;margin:0;left:" + (bx - g.width / 2) + "px;top:" + (by - g.height / 2) + "px;width:" + g.width + "px;height:" + g.height + "px";
+  document.body.append(clone); gate.style.visibility = "hidden"; document.body.classList.add("sucking");
+  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a0f4a,#050316 70%)"; document.body.append(dark);
+  dark.animate([{ opacity: 0 }, { opacity: .96 }], { duration: 1300, easing: "ease-in", fill: "forwards" });
+  const w = $("pgw"), sy = scrollY, inner = el("div"); // 只把“当前这一屏”做成图层来旋转：整页很长，整体做图层会占用大量显存、容易卡
+  document.documentElement.style.overflowY = "scroll"; // 保留滚动条的位置，避免页面宽度变化引起重新排版
+  inner.style.transform = "translateY(" + -sy + "px)"; while (w.firstChild) inner.append(w.firstChild); w.append(inner);
+  w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;z-index:20;will-change:transform,opacity;transform-origin:" + bx + "px " + by + "px";
+  w.animate([{ transform: "rotate(0deg) scale(1)", opacity: 1 }, { transform: "rotate(540deg) scale(.03)", opacity: .1 }], { duration: 1500, easing: "cubic-bezier(.55,0,.85,.35)", fill: "forwards" });
+  setTimeout(() => clone.classList.add("open"), 350); fx.then(F => F && F.vortex(bx, by, 1500));
+  await new Promise(r => setTimeout(r, 1250));
+  clone.animate([{ transform: "scale(1)" }, { transform: "scale(1.6)" }], { duration: 320, easing: "ease-out", fill: "forwards" });
+  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#c9b6ff 60%)"; document.body.append(fl);
+  fl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: "forwards" });
+  await new Promise(r => setTimeout(r, 340)); go();
+}
+$("bTarot").onclick = enterTarot; $("tarotGate").onclick = enterTarot;
+addEventListener("pageshow", e => { if (e.persisted) location.reload(); }); // 从塔罗页按返回键回来时，重置页面状态
+try { if (sessionStorage.getItem("pwBack") === "1") { // 从塔罗页返回：页面从书里旋转着“吐”回来
+  sessionStorage.removeItem("pwBack"); const w = $("pgw"), hs = document.documentElement.style;
+  if (!reduceMo()) { // 动画期间同样只合成一屏，结束后恢复
+    hs.overflowY = "scroll"; w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;transform-origin:50% 50%";
+    w.animate([{ transform: "rotate(-420deg) scale(.04)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 1100, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }).finished.then(() => { w.style.cssText = ""; hs.overflowY = ""; }).catch(() => {});
+  }
+  document.documentElement.classList.remove("pwback");
+} } catch (e) {}
 
 bar(); wall(); danmaku();
 </script>

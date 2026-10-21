@@ -108,11 +108,6 @@ body.dg #spot{opacity:0}
 .stamp{display:none}
 .desk .stamp{display:block;position:absolute;right:18px;bottom:50px;z-index:2;pointer-events:none;font:11px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.1em;color:#ff9b3d;text-shadow:0 0 5px rgba(255,130,30,.7)}
 /* 彩蛋 */
-.fall{position:fixed;top:-120px;z-index:8;pointer-events:none;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.3);animation:fall linear forwards}
-div.fall{box-shadow:none}
-@keyframes fall{to{transform:translateY(125vh) rotate(360deg)}}
-body.rb .wall,body.rb header{animation:hue 6s linear}
-@keyframes hue{to{filter:hue-rotate(360deg)}}
 /* 底部弹幕 dock */
 #dock{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:10px;width:min(94vw,540px);padding:7px 7px 7px 16px;border-radius:999px;background:rgba(24,21,18,.62);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);font-family:system-ui,sans-serif;opacity:0;animation:fade 1s 1.6s forwards}
 #dock b{flex:none;font-weight:500;font-size:13px;letter-spacing:.16em;color:#fff;opacity:.88}
@@ -275,3 +270,26 @@ html.noscroll{overflow:hidden}
 #board.on #bgrid .env:not(.na){will-change:transform,opacity} /* 入场动画的信封提前生成合成层（在幕布后面完成），揭幕时不再卡 */
 /* 邮局页面打开时，暂停下面页面里持续运行的动画，把性能留给转场 */
 html.noscroll .blobs i,html.noscroll .dmk,html.noscroll #wm .wr,html.noscroll #wm .wk,html.noscroll #wm .wd{animation-play-state:paused}
+/* ===== 命运之书入口：悬浮的魔法书 + 环绕的符文 ===== */
+.gate{position:relative;display:block;margin:56px auto 0;padding:0 20px;border:0;background:none;color:var(--fg);cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
+.gate .bk{--w:118px;margin:0 auto}
+.gate .orbit{position:absolute;left:50%;top:76px;width:0;height:0;animation:spin 30s linear infinite;pointer-events:none}
+.gate .orbit i{position:absolute;left:-6px;top:-9px;font-style:normal;font-size:17px;color:var(--acc);opacity:.95;transform:rotate(calc(var(--k) * 60deg)) translateX(108px)}
+.gate .gt{display:block;margin-top:20px;font:400 clamp(20px,4.6vw,26px) "TitleZH","ZCOOL XiaoWei","Noto Serif SC","Songti SC",Georgia,serif;letter-spacing:.4em;color:var(--fg)}
+.gate .ge{display:block;margin-top:6px;font:400 11px "TitleEN","Italiana",Georgia,serif;letter-spacing:.42em;text-transform:uppercase;color:var(--acc)}
+.gate .gh{display:block;margin-top:10px;font-size:12px;letter-spacing:.22em;color:var(--mute);animation:gblink 3.2s ease-in-out infinite}
+@keyframes gblink{50%{opacity:.35}}
+.gate:hover .bk-cover,.gate:focus-visible .bk-cover{transform:translateZ(9px) rotateY(-36deg)}
+.gate:hover .bk-pg.p3{box-shadow:0 0 30px 8px rgba(255,222,150,.55)}
+/* 足迹文案 */
+.fp{margin-top:40px;font:12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;color:var(--mute)}
+.fp b{font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--acc)}
+/* 工具栏里的塔罗按钮：流光边框 */
+.chip.magic{border:1px solid transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(110deg,#8f6cff,#ff7ac6,#ffd36e,#6ee7ff,#8f6cff) border-box;background-size:auto,300% 100%;animation:mshift 8s linear infinite}
+@keyframes mshift{to{background-position:0 0,300% 0}}
+/* 被魔法书吸入时：固定在屏幕上的控件先淡出 */
+body.sucking #dock,body.sucking #vpl,body.sucking #vsw,body.sucking #top,body.sucking #wm,body.sucking #dm,body.sucking #toast,body.sucking #spot{opacity:0!important;transition:opacity .35s}
+html.pwback #pgw{opacity:0}
+@media(prefers-reduced-motion:reduce){.gate .orbit,.chip.magic{animation:none}}
+/* 吸入转场期间：暂停页面里其它持续运行的动画，把性能全部留给转场 */
+body.sucking .blobs i,body.sucking .dmk,body.sucking .chip.magic,body.sucking .gate .orbit,body.sucking .gate .gh,body.sucking #wm .wr,body.sucking #wm .wk,body.sucking #wm .wd{animation-play-state:paused}

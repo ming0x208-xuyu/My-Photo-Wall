@@ -25,3 +25,15 @@
   Cache-Control: public, max-age=86400
 /fonts/*
   Cache-Control: public, max-age=2592000
+/tarot.html
+  Cache-Control: public, max-age=0, must-revalidate
+/tarot.css
+  Cache-Control: public, max-age=0, must-revalidate
+/tarot.js
+  Cache-Control: public, max-age=0, must-revalidate
+/tarot-cards.js
+  Cache-Control: public, max-age=0, must-revalidate
+/book.css
+  Cache-Control: public, max-age=0, must-revalidate
+/fx.js
+  Cache-Control: public, max-age=0, must-revalidate

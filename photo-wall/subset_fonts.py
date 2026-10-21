@@ -20,8 +20,17 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent
 FONTS = ROOT / "fonts"
-EXTRA_ZH = "拾光邮局来信封寄出我的照片墙更多的故事即将到来"  # 页面里其它用到标题字体的文字（邮局标题等）
+EXTRA_ZH = "拾光邮局来信封寄出我的照片墙更多的故事即将到来命运之书塔罗权杖圣杯宝剑星币王牌二三四五六七八九十侍从骑士王后国王逆位正位牌库"  # 页面里其它用到标题字体的文字（邮局标题等）
 EN_TEXT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,-·&'!?:"
+
+
+def tarot_names():
+    """塔罗牌 22 张大阿尔卡那的中文牌名（牌面标题用）"""
+    src = ROOT / "tarot-cards.js"
+    if not src.exists():
+        return ""
+    block = re.search(r"/\*NAMES\*/(.*?)/\*END\*/", src.read_text("utf-8"), re.S)
+    return "".join(re.findall(r'\["([\u4e00-\u9fff]+)",\s*"[A-Za-z]', block.group(1))) if block else ""
 
 
 def site_text():
@@ -44,6 +53,6 @@ def run(src, out, text):
 
 
 if __name__ == "__main__":
-    zh = "".join(sorted(set(site_text() + EXTRA_ZH + "0123456789 ·")))
+    zh = "".join(sorted(set(site_text() + tarot_names() + EXTRA_ZH + "0123456789 ·")))
     run("ZCOOLXiaoWei-Regular.ttf", "title-zh.woff2", zh)
     run("Italiana-Regular.ttf", "title-en.woff2", EN_TEXT)
