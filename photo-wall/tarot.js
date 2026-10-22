@@ -13,6 +13,18 @@
   let tto; const toast = m => { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tto); tto = setTimeout(() => t.classList.remove("on"), 2200); };
   const st = s => { B.dataset.st = s; };
   B.style.setProperty("--back", 'url("' + T.back + '")');
+  const fallback3D = { reset() {}, setDeck() {}, shuffle() {}, enablePicking() {}, draw() {}, reveal() {}, emerge() {} };
+  let threeD = fallback3D;
+  const threeDReady = import("./tarot-3d.js").then(({ createTarotScene }) => {
+    threeD = createTarotScene({ cards: C, backSvg: T.backSvg, onPick: i => pick(i) });
+    threeD.setDeck(deck);
+    return threeD;
+  }).catch(error => {
+    document.body.classList.remove("three-ready");
+    document.getElementById("tarot3d")?.remove();
+    console.warn("Three.js 场景暂不可用，已保留原有塔罗桌面。", error);
+    return null;
+  });
 
   /* ---------- 星空 + 尘埃 + 火花（同一张画布） ---------- */
   const cv = $("sky"), cx = cv.getContext("2d");
@@ -65,11 +77,12 @@
 
   /* ---------- 开场：魔法书打开，把牌“吐”出来，视角转为 3D ---------- */
   async function intro() {
+    await threeDReady;
     let from = false; try { from = sessionStorage.getItem("pwTarot") === "1"; sessionStorage.removeItem("pwTarot"); } catch (e) {}
     sizeSky(); buildFan(); requestAnimationFrame(frame); fanEls.forEach(e => { e.style.opacity = 0; });
     const ibk = $("ibk"), r = ibk.getBoundingClientRect();
     await wait(from ? 300 : 800); ibk.classList.add("open"); burst(r.left + r.width / 2, r.top + r.height / 2, 46, "255,222,150"); await wait(1500);
-    B.classList.add("spit", "on-scene");
+    B.classList.add("spit", "on-scene"); threeD.emerge();
     fanEls.forEach((e, i) => {
       e.style.opacity = ""; if (reduce) return; const p = fanPos(i, fanEls.length);
       e.animate([{ transform: tf({ x: 0, y: -40 * U, z: 280, r: (rnd() - .5) * 140 }) + " scale(.3)", opacity: 0 }, { opacity: 1, offset: .25 }, { transform: tf(p), opacity: 1 }], { duration: 950, delay: 320 + i * 9, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" });
@@ -80,6 +93,7 @@
   /* ---------- 选牌阵 → 洗牌 → 抽牌 → 翻牌 ---------- */
   document.querySelectorAll("[data-sp]").forEach(b => { b.onclick = () => chooseSpread(b.dataset.sp); });
   function chooseSpread(k) {
+    threeD.reset();
     spread = SP[k]; slots.replaceChildren();
     spread.pos.forEach((p, i) => { const s = el("div", "slot", `<span>${spread.labels[i]}</span>`); slots.append(s); requestAnimationFrame(() => s.classList.add("on")); });
     metrics(); state = "ready"; st("ready");
@@ -88,21 +102,23 @@
   $("bBackSp").onclick = () => { slots.replaceChildren(); spread = null; state = "menu"; st("menu"); };
   $("bShuf").onclick = async () => {
     if (state !== "ready") return; state = "shuffle"; st("shuffle"); fan.classList.add("off"); deck = shuffle(C.map(c => c.id)); used.clear();
+    threeD.setDeck(deck); threeD.shuffle();
     const n = fanEls.length, dur = 1500;
     if (!reduce) fanEls.forEach((e, i) => { // 牌扇收拢、绕圈、再散开
       const p = fanPos(i, n), a = i / n * 6.283, mid = { x: (rnd() - .5) * 36 * U, y: 60 * U + (rnd() - .5) * 24 * U, r: (rnd() - .5) * 40 }, orb = { x: Math.cos(a * 2) * 90 * U, y: 40 * U + Math.sin(a * 2) * 50 * U, r: a * 57 };
       e.animate([{ transform: tf(p) }, { transform: tf(mid), offset: .32 }, { transform: tf(orb), offset: .62 }, { transform: tf(mid), offset: .8 }, { transform: tf(p) }], { duration: dur, delay: i * 5, easing: "cubic-bezier(.45,0,.3,1)" });
     });
     const [sx, sy] = tableCenter(); for (let k = 0; k < 7; k++) setTimeout(() => burst(sx, sy, 24, "190,150,255"), 350 + k * 170);
-    await wait(dur + n * 5 + 150); fan.classList.remove("off"); state = "pick"; st("pick"); updPickT();
+    await wait(dur + n * 5 + 150); fan.classList.remove("off"); threeD.enablePicking(); state = "pick"; st("pick"); updPickT();
   };
-  const updPickT = () => { $("mPickT").innerHTML = `凭直觉，从牌扇里抽出 <b>${spread.n - picks.length}</b> 张牌<small>Trust your intuition · ${picks.length} / ${spread.n}</small>`; };
+  const updPickT = () => { $("mPickT").innerHTML = `拖动旋转圆形牌环，凭直觉抽出 <b>${spread.n - picks.length}</b> 张<small>Drag to rotate · ${picks.length} / ${spread.n}</small>`; };
   fan.addEventListener("click", e => { const f = e.target.closest(".fc"); if (f) pick(+f.dataset.i); });
   $("bAuto").onclick = async () => { while (state === "pick" && picks.length < spread.n) { const free = fanEls.map((_, i) => i).filter(i => !used.has(i)); pick(free[Math.floor(rnd() * free.length)]); await wait(420); } };
   async function pick(i) {
     if (state !== "pick" || picks.length >= spread.n || used.has(i)) return; used.add(i);
     const k = picks.length, c = C[deck[i]], p = fanPos(i, fanEls.length), pk = { cw: makeCard(c, rnd() < .3), c, rev: 0, revealed: false, landed: false };
     pk.rev = pk.cw.querySelector(".cf").classList.contains("rv"); fanEls[i].style.visibility = "hidden"; slots.append(pk.cw); pk.cw.style.transform = tf(p); picks.push(pk); updPickT();
+    threeD.draw(i, c, pk.rev, k, spread.n);
     if (picks.length === spread.n) { state = "reveal"; st("reveal"); }
     const to = slotXY(k), mid = { x: (p.x + to.x) / 2, y: (p.y + to.y) / 2 - 40 * U, z: 130, r: p.r / 2 };
     const a = pk.cw.animate([{ transform: tf(p) }, { transform: tf(mid), offset: .5 }, { transform: tf(to) }], { duration: reduce ? 1 : 760, easing: "cubic-bezier(.3,.7,.2,1)" });
@@ -114,7 +130,7 @@
     for (let k = 0; k < picks.length; k++) {
       const p = picks[k]; st("read");
       const a = p.cw.animate([{ transform: tf(slotXY(k)) }, { transform: standTf(k) }], { duration: reduce ? 1 : 950, easing: "cubic-bezier(.2,.9,.2,1)", fill: "forwards" });
-      p.cw.querySelector(".cd").classList.add("flip"); await wait(520);
+      p.cw.querySelector(".cd").classList.add("flip"); threeD.reveal(k); await wait(520);
       const r = p.cw.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 34, rgb(p.c.color));
       p.revealed = true; showReading(k); a.finished.then(() => { p.cw.style.transform = standTf(k); a.cancel(); }).catch(() => {});
       await wait(1500);
@@ -135,6 +151,7 @@
     $("pSum").textContent = spread.n === 1 ? `愿「${kw[0]}」陪你度过今天。牌只是镜子，答案始终在你心里。` : `过去的「${kw[0]}」，造就了现在的「${kw[1]}」，也在指向未来的「${kw[2]}」。把三张牌连起来读，故事就浮现了。`;
   }
   $("bAgain").onclick = () => {
+    threeD.reset();
     picks.forEach(p => p.cw.remove()); picks = []; used.clear(); revealing = false; slots.replaceChildren(); spread = null; $("q").value = "";
     fanEls.forEach(e => { e.style.visibility = ""; }); state = "menu"; st("menu");
   };

@@ -113,3 +113,11 @@ body[data-st=read] #panel,body[data-st=done] #panel{transform:translate(-50%,0)}
 /* 离开页面时的淡出 */
 body.leave #scene,body.leave #hud,body.leave #menu,body.leave #panel{opacity:0;transition:opacity .6s}
 body.leave #sky{opacity:.2;transition:opacity .6s}
+/* Three.js 实景：木质牌桌、实体牌叠与真实光照由 WebGL 画布绘制 */
+#tarot3d{position:absolute;inset:0;display:block;width:100%;height:100%;z-index:0;touch-action:none;cursor:grab;outline:0}
+#tarot3d:active{cursor:grabbing}
+body.three-ready #table{background:none;box-shadow:none}
+body.three-ready #circle,body.three-ready #slots,body.three-ready #fan{display:none}
+body.three-ready #par,body.three-ready #table{pointer-events:none}
+body.three-ready #par{transform:none}
+@media(prefers-reduced-motion:reduce){#tarot3d{cursor:pointer}}
