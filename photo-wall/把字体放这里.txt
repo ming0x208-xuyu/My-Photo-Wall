@@ -1,0 +1,5 @@
+把下载的英文标题字体放在本文件夹，文件名需与 tarot.css 里 @font-face 一致：
+  CinzelDecorative-Bold.woff2  （首选，体积小）
+  CinzelDecorative-Bold.ttf    （备选，二选一或都放）
+字体来自 Google Fonts 的 Cinzel Decorative（开源 OFL 协议，可免费商用）。
+想换别的字体：改 tarot.css 顶部 @font-face 的文件名即可，字体族名 TarotTitle 不要改。
