@@ -2,330 +2,18 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>我的照片墙</title>
 <meta name="description" content="把值得记住的瞬间，挂在墙上">
+<link rel="icon" href="data:,">
 <meta property="og:type" content="website">
 <meta property="og:title" content="我的照片墙">
 <meta property="og:description" content="把值得记住的瞬间，挂在墙上。来看看，也可以点个赞、留一条弹幕。">
 <meta property="og:image" content="https://mphotowall.com/og.jpg">
 <meta property="og:url" content="https://mphotowall.com/">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Italiana&display=swap">
-<style>
-/* 魔法书：首页的塔罗入口与塔罗页开场共用（纯 CSS 3D，不使用图片） */
-.bk{--w:150px;position:relative;width:var(--w);height:calc(var(--w) * 1.28);perspective:800px;pointer-events:none}
-.bk-3d{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(16deg) rotateY(-28deg);animation:bk-f 5.5s ease-in-out infinite}
-@keyframes bk-f{50%{transform:rotateX(10deg) rotateY(-18deg) translateY(-8px)}}
-.bk-3d>*{position:absolute;inset:0;border-radius:3px 9px 9px 3px}
-.bk-back{background:linear-gradient(135deg,#20174a,#0f0a28);transform:translateZ(-10px);box-shadow:0 22px 44px rgba(0,0,0,.55)}
-.bk-pg{inset:4px 4px 4px 3px;border-radius:2px 6px 6px 2px;background:repeating-linear-gradient(180deg,#f5ecd7 0 2px,#d8ccb0 2px 3px)}
-.bk-pg.p1{transform:translateZ(-6px)}.bk-pg.p2{transform:translateZ(-2px)}
-.bk-pg.p3{transform:translateZ(3px);background:radial-gradient(circle at 50% 45%,#fff8de,#f0dfb2);transition:box-shadow 1s}
-.bk-cover{transform-origin:left center;transform:translateZ(9px);transition:transform 1.2s cubic-bezier(.6,0,.2,1);background:linear-gradient(135deg,#34257c,#170f3b);border:1px solid rgba(236,210,154,.55);box-shadow:inset 0 0 0 5px rgba(236,210,154,.08),0 0 24px rgba(120,90,255,.35)}
-.bk-cover svg{position:absolute;inset:8%;width:84%;height:84%;fill:none;stroke:#ecd29a;stroke-width:1;stroke-linecap:round;stroke-linejoin:round}
-.bk.open .bk-cover{transform:translateZ(9px) rotateY(-160deg)}
-.bk.open .bk-pg.p3{box-shadow:0 0 46px 14px rgba(255,222,150,.75)}
-.bk-halo{position:absolute;inset:-48%;z-index:-1;border-radius:50%;background:radial-gradient(closest-side,rgba(130,100,255,.55),rgba(130,100,255,0));animation:bk-h 3.8s ease-in-out infinite}
-@keyframes bk-h{50%{transform:scale(1.16);opacity:.7}}
-@media(prefers-reduced-motion:reduce){.bk-3d,.bk-halo{animation:none}}
-
-/* 标题字体：本地引用（把字体文件放进 fonts/ 文件夹，见 fonts/README.txt）。文件不存在时自动退回系统字体 */
-@font-face{font-family:"TitleZH";src:url("fonts/title-zh.woff2") format("woff2"),url("fonts/ZCOOLXiaoWei-Regular.ttf") format("truetype");font-display:swap}
-@font-face{font-family:"TitleEN";src:url("fonts/title-en.woff2") format("woff2"),url("fonts/Italiana-Regular.ttf") format("truetype");font-display:swap}
-:root{--bg:#f6f3ee;--fg:#2a2622;--mute:#8a8178;--card:#e9e3da;--acc:#c0714a}
-@media(prefers-color-scheme:dark){:root{--bg:#161412;--fg:#ece6dd;--mute:#8d857b;--card:#221f1c;--acc:#e09068}}
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--fg);font-family:"Noto Serif SC","Songti SC",Georgia,serif;min-height:100vh}
-header{text-align:center;padding:64px 20px 28px}
-h1{font:400 clamp(34px,6.6vw,62px)/1.15 "TitleZH","ZCOOL XiaoWei","Noto Serif SC","Songti SC",Georgia,serif;letter-spacing:.14em}
-header p{color:var(--mute);margin-top:12px;letter-spacing:.2em;font-size:14px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:8px 16px 28px;font-family:system-ui,sans-serif}
-.chip{border:1px solid var(--mute);background:none;color:var(--fg);border-radius:999px;padding:6px 16px;font-size:13px;cursor:pointer;transition:.2s}
-.chip:hover{border-color:var(--acc);color:var(--acc)}
-.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.wall{columns:4 240px;column-gap:14px;max-width:1360px;margin:0 auto;padding:0 14px 60px}
-.item{break-inside:avoid;margin-bottom:14px;border-radius:12px;overflow:hidden;position:relative;cursor:zoom-in;background:var(--card);opacity:0;transform:translateY(70px) scale(.9) rotate(var(--r,2deg));filter:blur(10px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .9s}
-.item.in{opacity:1;transform:none;filter:none}
-.item.done{transition:transform .35s ease,box-shadow .35s ease}
-.item.done:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,.3)}
-.item img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transform:scale(1.2);transition:opacity .8s,transform 1.4s cubic-bezier(.2,.7,.2,1)}
-.item.in img.ok{opacity:1;transform:none}
-.item.done:hover img.ok{transform:scale(1.07);transition:transform .6s}
-h1{perspective:600px}
-.ch{display:inline-block;opacity:0;transform:translateY(34px) rotateX(-80deg);animation:ch .9s cubic-bezier(.2,.7,.2,1) forwards}
-@keyframes ch{to{opacity:1;transform:none}}
-header{will-change:transform,opacity}
-header p,.bar{opacity:0;animation:fade 1s forwards}
-header p{animation-delay:.9s}.bar{animation-delay:1.3s}
-@keyframes fade{to{opacity:1}}
-.blobs{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.blobs i{position:absolute;width:42vw;height:42vw;border-radius:50%;background:radial-gradient(closest-side,var(--c,var(--acc)),transparent);opacity:.3;animation:fl 18s ease-in-out infinite alternate}
-.blobs i:nth-child(1){top:-10vw;left:-8vw}
-.blobs i:nth-child(2){top:35vh;right:-12vw;--c:#6a8fd8;animation-duration:24s}
-.blobs i:nth-child(3){bottom:-14vw;left:25vw;--c:#d8a86a;animation-duration:21s}
-@keyframes fl{to{transform:translate(8vw,6vh) scale(1.25)}}
-#pg{position:fixed;top:0;left:0;right:0;height:3px;background:var(--acc);transform:scaleX(0);transform-origin:left;z-index:10}
-#dm{position:fixed;inset:0;z-index:5;pointer-events:none;overflow:hidden}
-.dmk{position:absolute;left:0;white-space:nowrap;color:#fff;background:rgba(20,18,16,.62);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 18px;letter-spacing:.12em;text-shadow:0 1px 6px rgba(0,0,0,.35);box-shadow:0 6px 24px rgba(0,0,0,.18);animation:dm linear forwards;will-change:transform}
-@keyframes dm{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
-@media(prefers-reduced-motion:reduce){#dm{display:none}*{animation:none!important;transition:none!important}.item,.ch,header p,.bar,.item img{opacity:1!important;transform:none!important;filter:none!important}}
-.cap{position:absolute;inset:auto 0 0 0;padding:28px 14px 10px;color:#fff;font-size:13px;letter-spacing:.08em;background:linear-gradient(transparent,rgba(0,0,0,.6));opacity:0;transition:.3s;font-family:system-ui,sans-serif}
-.item:hover .cap{opacity:1}
-.empty{text-align:center;color:var(--mute);padding:80px 0}
-footer{text-align:center;color:var(--mute);font-size:12px;padding:0 0 40px;letter-spacing:.15em}
-#lb{position:fixed;inset:0;background:rgba(10,9,8,.94);display:flex;opacity:0;visibility:hidden;transition:opacity .35s,visibility .35s;align-items:center;justify-content:center;z-index:9;flex-direction:column;padding:20px}
-#lb.on{opacity:1;visibility:visible}
-#lb img.pop{animation:pop .45s cubic-bezier(.2,.7,.2,1)}
-@keyframes pop{from{opacity:0;transform:scale(.88)}}
-#lb img{max-width:100%;max-height:82vh;border-radius:6px;box-shadow:0 10px 60px #000a}
-#lbc{color:#ddd;margin-top:14px;font-size:14px;letter-spacing:.1em;text-align:center}
-#lb button{position:absolute;background:none;border:0;color:#fff;font-size:34px;cursor:pointer;opacity:.7;padding:14px}
-#lb button:hover{opacity:1}
-#x{top:6px;right:10px}#pv{left:6px;top:50%}#nx{right:6px;top:50%}
-.item:not([style*=aspect]){min-height:120px}
-#lbi{transition:filter .4s,opacity .4s}
-#lbi.ld{filter:blur(5px);opacity:.85}
-#dl{position:absolute;top:16px;left:16px;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px;font:13px system-ui,sans-serif;letter-spacing:.06em;text-decoration:none;background:rgba(255,255,255,.1);opacity:.9}
-#dl:hover{background:var(--acc);border-color:var(--acc)}
-#dl[hidden]{display:none}
-#top{position:fixed;right:calc(20px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:46px;height:46px;border-radius:50%;border:0;background:var(--acc);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:6;box-shadow:0 8px 24px rgba(0,0,0,.28);opacity:0;transform:translateY(20px) scale(.8);pointer-events:none;transition:opacity .35s,transform .35s,box-shadow .2s}
-#top.show{opacity:1;transform:none;pointer-events:auto}
-#top.show:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.35)}
-/* 灯箱操作区、故事 */
-#acts{position:absolute;top:16px;left:16px;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100% - 70px);z-index:2}
-#acts a,#acts button{position:static;color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 16px;font:13px system-ui,sans-serif;letter-spacing:.06em;text-decoration:none;background:rgba(255,255,255,.1);opacity:.9;cursor:pointer}
-#acts a:hover,#acts button:hover,#acts .lkb.on{background:var(--acc);border-color:var(--acc);opacity:1}
-#acts a[hidden]{display:none}
-#lb img#lbi{max-height:calc(100vh - 230px);max-height:calc(100dvh - 230px)}
-#lbc{max-width:min(92vw,620px)}
-#lbc .lt{font-size:17px;letter-spacing:.12em;color:#fff}
-#lbc .lm{margin-top:4px;font-size:12px;color:#aaa}
-#lbc .ls{margin-top:8px;line-height:1.8;font-size:14px;color:#ddd;letter-spacing:.06em;animation:fu .8s .2s both}
-#lbc .ln{margin-top:8px;font-size:12px;color:#888}
-#lbc div:empty{display:none}
-@keyframes fu{from{opacity:0;transform:translateY(8px)}}
-/* 点赞 */
-.lkb{position:absolute;top:8px;right:8px;z-index:3;border:0;border-radius:999px;padding:4px 10px;font:12px system-ui,sans-serif;color:#fff;background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer;opacity:.92}
-.lkb.on{background:var(--acc)}
-.lkb.hp{animation:hp .45s}
-@keyframes hp{40%{transform:scale(1.4)}}
-/* 发弹幕输入框、访客弹幕 */
-.dmk.vis{background:rgba(40,60,90,.5)}
-.dmk.mine{background:rgba(192,113,74,.62);border-color:var(--acc);font-weight:600}
-#tools{padding-top:0}
-/* 拍立得桌面模式：深色桌面 + 暖色聚光 + 胶带 + 日期戳 */
-#deskbg{position:fixed;inset:0;z-index:-1;opacity:0;transition:opacity 1s;pointer-events:none;background:radial-gradient(ellipse 95% 75% at 50% 0%,#4b3c30 0%,#261e18 55%,#120e0b 100%)}
-#deskbg::after{content:"";position:absolute;inset:0;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
-body.deskmode #deskbg{opacity:1}
-body.deskmode{--fg:#f0e6d6;--mute:#a89c8a;--acc:#dba36d}
-.blobs{transition:opacity 1s}
-body.deskmode .blobs{opacity:0}
-#spot{position:fixed;left:0;top:0;width:900px;height:900px;margin:-450px 0 0 -450px;pointer-events:none;z-index:3;opacity:0;transition:opacity 1s;will-change:transform;background:radial-gradient(circle,rgba(255,214,160,.14),transparent 62%)}
-body.deskmode #spot{opacity:1}
-body.dg #spot{opacity:0}
-.wall.desk{columns:auto;position:relative;z-index:1;isolation:isolate}
-.desk .item{position:absolute;left:0;top:0;width:var(--w,200px);margin:0;padding:10px 10px 40px;background:linear-gradient(160deg,#fdfbf6,#f1ebde)!important;border-radius:2px;aspect-ratio:auto!important;box-shadow:0 1px 1px rgba(0,0,0,.25),0 6px 12px rgba(0,0,0,.3),0 22px 44px rgba(0,0,0,.35);cursor:grab;overflow:visible;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.desk .item::before{content:"";position:absolute;top:-11px;left:50%;width:74px;height:22px;margin-left:-37px;transform:rotate(var(--tape,-3deg));background:rgba(236,216,172,.6);box-shadow:0 1px 3px rgba(0,0,0,.25);z-index:2}
-.desk .item:nth-child(3n)::before{background:rgba(190,222,212,.6)}
-.desk .item:nth-child(3n+1)::before{background:rgba(238,196,200,.6)}
-.desk .item.in{transform:rotate(var(--rot,0deg));animation:drop .95s cubic-bezier(.2,.85,.25,1) both}
-.desk .item.done{animation:none;transition:translate .6s cubic-bezier(.2,.9,.3,1.12),transform .45s cubic-bezier(.2,.9,.3,1.2),box-shadow .35s}
-.desk .item.done:hover{transform:rotate(0deg) scale(1.06) translateY(-4px);z-index:50;box-shadow:0 2px 2px rgba(0,0,0,.25),0 12px 24px rgba(0,0,0,.35),0 34px 70px rgba(0,0,0,.45)}
-.desk .item.done.dragging{transform:rotate(0deg) scale(1.1);cursor:grabbing;transition:transform .25s,box-shadow .25s;will-change:transform,translate;box-shadow:0 24px 48px rgba(0,0,0,.5)}
-@keyframes drop{0%{opacity:0;transform:translateY(-90px) rotate(calc(var(--rot,0deg) + 12deg)) scale(1.05)}55%{opacity:1;transform:translateY(10px) rotate(calc(var(--rot,0deg) - 3deg)) scale(.98)}78%{transform:translateY(-3px) rotate(calc(var(--rot,0deg) + 1deg))}100%{opacity:1;transform:rotate(var(--rot,0deg))}}
-.desk .item img{height:auto;aspect-ratio:1/1;object-fit:cover;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1);filter:contrast(1.03) saturate(1.06)}
-.desk .item .cap{position:absolute;inset:auto 10px 8px;padding:0;background:none;color:#4b443b;text-align:center;opacity:1;font:15px "Segoe Script","Bradley Hand","Noto Serif SC",cursive;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stamp{display:none}
-.desk .stamp{display:block;position:absolute;right:18px;bottom:50px;z-index:2;pointer-events:none;font:11px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.1em;color:#ff9b3d;text-shadow:0 0 5px rgba(255,130,30,.7)}
-/* 彩蛋 */
-/* 底部弹幕 dock */
-#dock{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:10px;width:min(94vw,540px);padding:7px 7px 7px 16px;border-radius:999px;background:rgba(24,21,18,.62);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.12);font-family:system-ui,sans-serif;opacity:0;animation:fade 1s 1.6s forwards}
-#dock b{flex:none;font-weight:500;font-size:13px;letter-spacing:.16em;color:#fff;opacity:.88}
-#dock s{flex:none;width:1px;height:20px;background:rgba(255,255,255,.2)}
-#dock .sw{position:relative;flex:none;width:40px;height:24px;border-radius:99px;border:0;background:rgba(255,255,255,.22);cursor:pointer;transition:background .3s}
-#dock .sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .3s cubic-bezier(.3,1.4,.5,1)}
-#dock .sw.on{background:var(--acc)}
-#dock .sw.on::after{left:19px}
-#dock input{flex:1;min-width:0;border:0;outline:0;background:none;color:#fff;font:15px system-ui,sans-serif;padding:8px 4px}
-#dock input::placeholder{color:rgba(255,255,255,.5)}
-#dmgo{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--acc);color:#fff;font-size:18px;cursor:pointer;transition:transform .2s}
-#dmgo:hover{transform:scale(1.1)}
-#top{bottom:calc(86px + env(safe-area-inset-bottom,0px))}
-/* 高清图加载中 */
-#spin{display:none;position:absolute;top:38%;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border:3px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;pointer-events:none}
-#lb.busy #spin{display:block}
-@keyframes spin{to{transform:rotate(360deg)}}
-#lbc .lx{margin-top:6px;font:11px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.08em;color:#8d857b}
-/* 回到顶部：玻璃圆钮 + 阅读进度圆环 + 箭头 */
-#top{width:48px;height:48px;padding:0;border:1px solid rgba(255,255,255,.18);background:rgba(24,21,18,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 8px 26px rgba(0,0,0,.35)}
-#top svg{display:block;width:100%;height:100%}
-#top .rg,#top .rp{fill:none;stroke-width:2.4}
-#top .rg{stroke:rgba(255,255,255,.16)}
-#top .rp{stroke:var(--acc);stroke-linecap:round;stroke-dasharray:131.95;stroke-dashoffset:131.95;transform:rotate(-90deg);transform-origin:24px 24px;transition:stroke-dashoffset .2s}
-#top path{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
-#top:hover path{transform:translateY(-2px)}
-/* 提示条 */
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);max-width:92vw;padding:9px 18px;border-radius:999px;background:rgba(24,21,18,.88);color:#fff;font:14px system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:20;opacity:0;pointer-events:none;transition:.3s}
-#toast.on{opacity:1;transform:translate(-50%,0)}
-/* 视图开关：独立悬浮在右上角的滑动胶囊 */
-#vsw{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:8;display:flex;padding:4px;border-radius:999px;background:rgba(24,21,18,.58);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px rgba(0,0,0,.28);animation:pin 1s 1.4s backwards}
-#vsw button{position:relative;z-index:1;display:flex;align-items:center;gap:6px;border:0;background:none;color:rgba(255,255,255,.66);padding:7px 14px;border-radius:999px;font:13px system-ui,sans-serif;letter-spacing:.08em;cursor:pointer;transition:color .3s}
-#vsw button:hover{color:#fff}
-#vsw button.on{color:#fff}
-#vsw svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#vth{position:absolute;top:4px;bottom:4px;left:4px;width:var(--tw,0);border-radius:999px;background:var(--acc);transform:translateX(var(--tx,0));transition:transform .45s cubic-bezier(.3,1.3,.5,1),width .45s;box-shadow:0 4px 14px rgba(0,0,0,.3)}
-@media(max-width:600px){#vsw{right:10px}#vsw button{padding:8px 11px}#vsw button span{display:none}}
-/* 修复：桌面模式下页面横向被撑宽，导致画面晃动、右上角开关被顶出屏幕 */
-html{overflow-x:hidden;overscroll-behavior-x:none}
-.wall{overflow-x:clip}
-.desk .item img{transform:none}
-/* 左上角：留言板按钮（与右上角视图开关对称） */
-#vpl{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:14px;z-index:8;display:flex;padding:4px;border-radius:999px;background:rgba(24,21,18,.58);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);border:1px solid rgba(255,255,255,.16);box-shadow:0 8px 28px rgba(0,0,0,.28);animation:pin 1s 1.4s backwards}
-#vpl button{display:flex;align-items:center;gap:6px;border:0;background:none;color:#fff;padding:7px 14px;border-radius:999px;font:13px system-ui,sans-serif;letter-spacing:.08em;cursor:pointer;transition:background .3s}
-#vpl button:hover{background:var(--acc)}
-#vpl svg{width:15px;height:15px;fill:currentColor}
-@media(max-width:600px){#vpl{left:10px}#vpl button{padding:8px 11px}#vpl button span{display:none}}
-/* ===== 左上角：留言板按钮 ===== */
-#vpl svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#vpl button{position:relative}
-#vcnt{margin-left:2px;padding:1px 7px;border-radius:999px;background:var(--acc);color:#fff;font:600 11px system-ui,sans-serif;letter-spacing:0}
-#vpl button:hover #vcnt{background:#fff;color:#3a2a1c}
-@media(max-width:600px){#vcnt{position:absolute;top:-3px;right:-3px;padding:0 5px}}
-/* ===== 留言板：独立页面（极光 + 颗粒 + 玻璃 + 信封） ===== */
-html.noscroll{overflow:hidden}
-#board{position:fixed;inset:0;z-index:15;display:none;background:#0c0a12;color:#f3ece2}
-#board.on{display:block}
-.bb{position:absolute;inset:0;overflow:hidden}
-.bb i{position:absolute;width:55vmax;height:55vmax;border-radius:50%;background:radial-gradient(closest-side,var(--c),transparent);opacity:.6;animation:fl 20s ease-in-out infinite alternate}
-.bb i:nth-child(1){top:-22vmax;left:-16vmax;--c:#6a4cff}
-.bb i:nth-child(2){bottom:-26vmax;right:-16vmax;--c:#ff7a59;animation-duration:26s}
-.bb i:nth-child(3){top:28%;left:38%;--c:#13c4a8;opacity:.3;animation-duration:23s}
-.grain{position:absolute;inset:0;pointer-events:none;opacity:.14;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
-.mono{font:12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;color:rgba(243,236,226,.55)}
-.bscroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:92px 22px 140px}
-.bh{text-align:center;padding:8px 0 40px}
-.bh h2{margin:12px 0;font:400 clamp(46px,10vw,98px)/1.05 "TitleZH","ZCOOL XiaoWei","Noto Serif SC","Songti SC",Georgia,serif;letter-spacing:.12em;background:linear-gradient(110deg,#fff 10%,#ffd9b8 45%,#b7a6ff 92%);-webkit-background-clip:text;background-clip:text;color:transparent}
-#board.rv .bh>*{animation:bu .9s cubic-bezier(.2,.8,.2,1) both}
-#board.rv .bh>:nth-child(1){animation-delay:.74s}#board.rv .bh>:nth-child(2){animation-delay:.84s}#board.rv .bh>:nth-child(3){animation-delay:.94s}
-@keyframes bu{from{opacity:0;transform:translateY(28px)}}
-#bback,#bcomp{-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 34px rgba(0,0,0,.35)}
-#bback{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));left:16px;z-index:10;padding:8px 16px;border-radius:999px;color:#fff;font:13px system-ui,sans-serif;letter-spacing:.08em;cursor:pointer;transition:background .3s}
-#board.rv #bback{animation:bu .7s cubic-bezier(.2,.8,.2,1) .85s both}
-#bback:hover{background:var(--acc)}
-#bcomp{position:absolute;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:10;width:min(94vw,560px);display:flex;gap:10px;padding:7px 7px 7px 18px;border-radius:999px}
-#board.rv #bcomp{animation:bcu .9s cubic-bezier(.2,.8,.2,1) 1s both}
-@keyframes bcu{from{opacity:0;transform:translate(-50%,40px)}}
-#bin{flex:1;min-width:0;border:0;outline:0;background:none;color:#fff;font:15px system-ui,sans-serif;padding:8px 2px}
-#bin::placeholder{color:rgba(255,255,255,.45)}
-#bgo{flex:none;border:0;border-radius:999px;background:var(--acc);color:#fff;padding:0 20px;font:14px system-ui,sans-serif;letter-spacing:.08em;cursor:pointer;transition:transform .2s}
-#bgo:hover{transform:scale(1.05)}
-#bempty{text-align:center;padding:60px 0}
-#bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:40px 30px;max-width:1180px;margin:0 auto}
-@media(max-width:600px){#bgrid{grid-template-columns:repeat(2,1fr);gap:30px 14px}.bscroll{padding-left:14px;padding-right:14px}}
-/* 信封 */
-.env{position:relative;display:block;width:100%;aspect-ratio:1.5;padding:0;border:0;background:none;color:inherit;cursor:pointer;container-type:inline-size;perspective:800px;transform:rotate(var(--r,0deg));transition:transform .5s cubic-bezier(.2,.9,.3,1.3);-webkit-tap-highlight-color:transparent}
-#board.rv #bgrid .env{animation:envIn .9s cubic-bezier(.2,.8,.2,1) calc(var(--i,0) * 60ms + .8s) backwards}
-#board.rv #bgrid .env.fresh{animation:envFresh 1.1s cubic-bezier(.2,.9,.2,1) backwards}
-#board.rv #bgrid .env.na{animation:none}
-@keyframes envIn{from{opacity:0;transform:translateY(60px) rotate(calc(var(--r,0deg) * 3)) scale(.86)}}
-@keyframes envFresh{from{opacity:0;transform:translateY(140px) rotate(-14deg) scale(.7)}}
-.env:not(.big):hover{transform:translateY(-10px) rotate(0deg) scale(1.04)}
-.env>*{position:absolute}
-.env::before,.env::after{content:"";position:absolute;inset:0;border-radius:7px}
-.ev-b{inset:0;z-index:0;border-radius:7px;background:linear-gradient(165deg,#f4ecdd,#e4d8c0);box-shadow:0 1px 1px rgba(0,0,0,.3),0 12px 28px rgba(0,0,0,.45)}
-.ev-p{z-index:1;left:6%;right:6%;top:8%;height:80%;border-radius:3px;background:linear-gradient(#fffdf8,#f6efe0);box-shadow:0 0 0 1px rgba(0,0,0,.05);transition:transform .9s cubic-bezier(.2,.9,.25,1),height .9s cubic-bezier(.2,.9,.25,1)}
-.env::before{z-index:2;background:rgba(90,60,30,.22);clip-path:polygon(0 0,50% 57%,100% 0,100% 100%,0 100%)}
-.env::after{z-index:3;background:linear-gradient(170deg,#f9f2e5,#eadfc9);clip-path:polygon(0 0,50% 54.5%,100% 0,100% 100%,0 100%)}
-.ev-f{z-index:4;left:0;right:0;top:0;height:56%;border-radius:7px 7px 0 0;background:linear-gradient(180deg,#f2e8d4,#e2d5ba);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .6s cubic-bezier(.4,0,.2,1),z-index 0s .28s}
-.env:not(.big):hover .ev-f{transform:rotateX(34deg)}
-.env:not(.big):hover .ev-p{transform:translateY(-22%)}
-.ev-seal{z-index:5;left:50%;top:50%;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;font-size:8.5cqw;color:rgba(255,245,230,.92);background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--sc,#c0392b),#fff 38%),var(--sc,#c0392b) 58%,color-mix(in srgb,var(--sc,#c0392b),#000 42%));box-shadow:0 3px 8px rgba(0,0,0,.45),inset 0 -2px 3px rgba(0,0,0,.25);transition:opacity .25s}
-.ev-stamp{z-index:6;top:8%;right:6%;width:15%;aspect-ratio:.82;display:grid;place-items:center;font:600 3.6cqw ui-monospace,Menlo,Consolas,monospace;color:#fff;background:linear-gradient(135deg,#f3b98a,#d8704f);border:.8cqw solid #fffaf0;outline:1px dashed rgba(0,0,0,.28);outline-offset:1px}
-.ev-pm{z-index:6;top:6.5%;right:20%;width:17%;aspect-ratio:1;display:grid;place-items:center;border:1.5px solid rgba(70,45,30,.42);border-radius:50%;font:3.6cqw ui-monospace,Menlo,Consolas,monospace;color:rgba(70,45,30,.55);transform:rotate(-14deg)}
-.ev-to{z-index:6;top:10%;left:7%;font:3.8cqw ui-monospace,Menlo,Consolas,monospace;letter-spacing:.1em;color:rgba(70,45,30,.6)}
-.ev-tx{z-index:6;left:9%;right:9%;bottom:7%;font:6.2cqw/1.35 "Segoe Script","Bradley Hand","Noto Serif SC",cursive;color:#5a4636;text-align:left;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:opacity .3s}
-.pt{display:none}
-/* 拆信：大信封 */
-#ltr{position:absolute;inset:0;z-index:20;display:none;place-items:center}
-#ltr.on{display:grid;animation:fade .35s both}
-#ltr.out{opacity:0;transition:opacity .38s}
-.lbd{position:absolute;inset:0;background:rgba(8,6,12,.64);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.env.big{width:min(88vw,460px);margin-top:20vh;cursor:default;animation:none;transform:none;transition:none}
-.env.big .ev-p{z-index:1}
-.env.big.flip .ev-f{transform:rotateX(180deg);z-index:0}
-.env.big.flip .ev-seal{opacity:0}
-.env.big.open .ev-p{transform:translateY(-64%);height:150%}
-.env.big.open .ev-tx{opacity:0}
-.big .pt{display:block;padding:6% 8%;font:4.6cqw/1.9 "Noto Serif SC","Songti SC",Georgia,serif;color:#4b3b2e}
-.big .pt b{display:block;margin-bottom:2%;font-weight:600;color:#7a5a3d}
-.big .pt p{margin:0;background:repeating-linear-gradient(transparent 0 calc(1.9em - 1px),rgba(120,90,60,.2) calc(1.9em - 1px) 1.9em)}
-.big .pt em{display:block;margin-top:3%;text-align:right;font-size:3.6cqw;font-style:normal;color:#9a8670}
-/* 英文标题 */
-#te{margin-top:14px;font:400 clamp(12px,2.5vw,16px) "TitleEN","Italiana","Cormorant Garamond",Georgia,serif;letter-spacing:.5em;text-transform:uppercase;color:var(--acc);opacity:0;animation:fade 1s 1.1s forwards}
-#te::before,#te::after{content:"";display:inline-block;width:30px;height:1px;margin:0 .9em 0 .4em;vertical-align:middle;background:currentColor;opacity:.5}
-#te::after{margin:0 .4em 0 .9em}
-/* 水印 M：取景框 + 山峰 M + 太阳 */
-#wm{position:fixed;left:20px;bottom:20px;width:54px;z-index:4;color:var(--fg);opacity:0;pointer-events:none;animation:wmin 1.2s 2.2s forwards}
-@keyframes wmin{to{opacity:.26}}
-#wm .wd{animation:wmp 4.5s ease-in-out infinite}
-@keyframes wmp{50%{opacity:.3}}
-@media(max-width:600px){#wm{left:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:44px}}
-/* 手机：下滑超过一屏后，顶部按钮缩成角落里的半透明小件，滚动时更淡，点按时恢复 */
-@keyframes pin{from{opacity:0}}
-#vpl,#vsw{transition:transform .5s cubic-bezier(.3,1.2,.4,1),opacity .4s,background .4s,box-shadow .4s,border-color .4s}
-#vpl{transform-origin:top left}#vsw{transform-origin:top right}
-@media(max-width:600px){
-  body.isl #vpl,body.isl #vsw{transform:scale(.86);opacity:.58;background:rgba(24,21,18,.3);border-color:rgba(255,255,255,.1);box-shadow:none}
-  body.isl.sc #vpl,body.isl.sc #vsw{opacity:.3}
-  body.isl #vpl:active,body.isl #vsw:active,body.isl #vpl:focus-within,body.isl #vsw:focus-within{opacity:1;transform:scale(1)}
-  body.isl #vth{background:rgba(255,255,255,.24);box-shadow:none}
-  body.isl #vcnt{background:rgba(255,255,255,.28)}
-}
-/* 减少动态效果时，依靠淡入动画显示的元素也要保持可见 */
-@media(prefers-reduced-motion:reduce){#dock,#vsw,#vpl,#te,#bback{opacity:1!important}#wm{opacity:.26!important}}
-/* 徽标：镜头刻度环缓慢旋转，高光星点轻轻闪烁 */
-#wm .wr{transform-box:fill-box;transform-origin:center;animation:wspin 90s linear infinite}
-@keyframes wspin{to{transform:rotate(360deg)}}
-#wm .wk{animation:wtw 3.6s ease-in-out infinite}
-@keyframes wtw{50%{opacity:.25}}
-/* 转场幕布 */
-#curtain{position:fixed;border-radius:50%;background:#0c0a12;z-index:16;display:none;pointer-events:none;will-change:transform,opacity;transform:scale(.02)}
-/* 页面最底部的文字 */
-#more{padding:56px 20px 130px;text-align:center}
-#more .mz{font:400 clamp(20px,4.6vw,30px)/1.4 "TitleZH","ZCOOL XiaoWei","Noto Serif SC","Songti SC",Georgia,serif;letter-spacing:.22em;color:var(--fg);opacity:0;transform:translateY(14px);transition:opacity 1s,transform 1s cubic-bezier(.2,.8,.2,1)}
-#more .mz::before,#more .mz::after{content:"✦";margin:0 .9em;font-size:.5em;vertical-align:middle;color:var(--acc)}
-#more .me{margin-top:12px;font:400 12px "TitleEN","Italiana",Georgia,serif;letter-spacing:.42em;text-transform:uppercase;color:var(--acc);opacity:0;transition:opacity 1s .35s}
-#more.in .mz{opacity:.92;transform:none}
-#more.in .me{opacity:.85}
-#board.on #bgrid .env:not(.na){will-change:transform,opacity} /* 入场动画的信封提前生成合成层（在幕布后面完成），揭幕时不再卡 */
-/* 邮局页面打开时，暂停下面页面里持续运行的动画，把性能留给转场 */
-html.noscroll .blobs i,html.noscroll .dmk,html.noscroll #wm .wr,html.noscroll #wm .wk,html.noscroll #wm .wd{animation-play-state:paused}
-/* ===== 命运之书入口：悬浮的魔法书 + 环绕的符文 ===== */
-.gate{position:relative;display:block;margin:56px auto 0;padding:0 20px;border:0;background:none;color:var(--fg);cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent}
-.gate .bk{--w:118px;margin:0 auto}
-.gate .orbit{position:absolute;left:50%;top:76px;width:0;height:0;animation:spin 30s linear infinite;pointer-events:none}
-.gate .orbit i{position:absolute;left:-6px;top:-9px;font-style:normal;font-size:17px;color:var(--acc);opacity:.95;transform:rotate(calc(var(--k) * 60deg)) translateX(108px)}
-.gate .gt{display:block;margin-top:20px;font:400 clamp(20px,4.6vw,26px) "TitleZH","ZCOOL XiaoWei","Noto Serif SC","Songti SC",Georgia,serif;letter-spacing:.4em;color:var(--fg)}
-.gate .ge{display:block;margin-top:6px;font:400 11px "TitleEN","Italiana",Georgia,serif;letter-spacing:.42em;text-transform:uppercase;color:var(--acc)}
-.gate .gh{display:block;margin-top:10px;font-size:12px;letter-spacing:.22em;color:var(--mute);animation:gblink 3.2s ease-in-out infinite}
-@keyframes gblink{50%{opacity:.35}}
-.gate:hover .bk-cover,.gate:focus-visible .bk-cover{transform:translateZ(9px) rotateY(-36deg)}
-.gate:hover .bk-pg.p3{box-shadow:0 0 30px 8px rgba(255,222,150,.55)}
-/* 足迹文案 */
-.fp{margin-top:40px;font:12px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.14em;color:var(--mute)}
-.fp b{font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--acc)}
-/* 工具栏里的塔罗按钮：流光边框 */
-.chip.magic{border:1px solid transparent;background:linear-gradient(var(--bg),var(--bg)) padding-box,linear-gradient(110deg,#8f6cff,#ff7ac6,#ffd36e,#6ee7ff,#8f6cff) border-box;background-size:auto,300% 100%;animation:mshift 8s linear infinite}
-@keyframes mshift{to{background-position:0 0,300% 0}}
-/* 被魔法书吸入时：固定在屏幕上的控件先淡出 */
-body.sucking #dock,body.sucking #vpl,body.sucking #vsw,body.sucking #top,body.sucking #wm,body.sucking #dm,body.sucking #toast,body.sucking #spot{opacity:0!important;transition:opacity .35s}
-html.pwback #pgw{opacity:0}
-@media(prefers-reduced-motion:reduce){.gate .orbit,.chip.magic{animation:none}}
-/* 吸入转场期间：暂停页面里其它持续运行的动画，把性能全部留给转场 */
-body.sucking .blobs i,body.sucking .dmk,body.sucking .chip.magic,body.sucking .gate .orbit,body.sucking .gate .gh,body.sucking #wm .wr,body.sucking #wm .wk,body.sucking #wm .wd{animation-play-state:paused}
-</style>
+<link rel="stylesheet" href="book.css">
+<link rel="stylesheet" href="style.css">
 <script>try{if(sessionStorage.getItem("pwBack")==="1")document.documentElement.classList.add("pwback")}catch(e){}</script>
 </head>
 <body>
@@ -357,85 +45,8 @@ body.sucking .blobs i,body.sucking .dmk,body.sucking .chip.magic,body.sucking .g
 <div id="ltr"><div class="lbd"></div><div id="lbig" class="env big"></div></div></section>
 <div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
 
-<script>
-/* ============================================================
-   首页特效：高级烟花 + 魔法书吸入旋涡
-   按需加载（点到才下载），单张全屏画布，预渲染的发光精灵 + 叠加混合，粒子数量有上限，
-   结束后立刻销毁画布，不会长期占用资源。
-   ============================================================ */
-window.FX = (() => {
-  const low = (navigator.hardwareConcurrency || 4) <= 4 || innerWidth < 600, dpr = Math.min(devicePixelRatio || 1, low ? 1.25 : 1.5), CAP = low ? 320 : 560;
-  const PAL = [["255,205,100", "255,244,205"], ["255,105,195", "255,210,240"], ["105,228,255", "212,248,255"], ["160,140,255", "226,222,255"], ["120,255,180", "214,255,232"], ["255,255,255", "255,236,200"]];
-  const rnd = (a = 1, b) => b === undefined ? Math.random() * a : a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)];
-  const SPR = {};
-  const sprite = c => SPR[c] || (SPR[c] = (() => { // 预渲染一颗“发光的点”，之后全部用 drawImage 复制，比逐个画渐变快得多
-    const s = 48, k = document.createElement("canvas"); k.width = k.height = s; const g = k.getContext("2d"), r = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-    r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.16, `rgba(${c},.95)`); r.addColorStop(.5, `rgba(${c},.26)`); r.addColorStop(1, `rgba(${c},0)`); g.fillStyle = r; g.fillRect(0, 0, s, s); return k;
-  })());
-  let cv, cx, W, H, P = [], R = [], F = [], V = null, raf = 0, last = 0, plan = null, resolveFn = null;
-
-  function mount() { if (cv) return; W = innerWidth; H = innerHeight; cv = document.createElement("canvas"); cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:31;pointer-events:none"; cv.width = W * dpr; cv.height = H * dpr; document.body.appendChild(cv); cx = cv.getContext("2d"); cx.scale(dpr, dpr); last = performance.now(); raf = requestAnimationFrame(loop); }
-  function unmount() { cancelAnimationFrame(raf); raf = 0; if (cv) cv.remove(); cv = cx = null; P = []; R = []; F = []; V = null; plan = null; if (resolveFn) { const f = resolveFn; resolveFn = null; f(); } }
-  const add = p => { if (P.length < CAP) P.push(p); };
-
-  /* ---------- 五种烟花 ---------- */
-  const A = {
-    peony(x, y, pal) { const n = low ? 54 : 88; for (let i = 0; i < n; i++) { const a = rnd(6.283), v = 70 + rnd(170) * (Math.random() < .5 ? 1 : .6); add({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 80, d: .985, l: 1, m: rnd(1.3, 2), c: i % 3 ? pal[0] : pal[1], s: rnd(9, 15), cr: Math.random() < .06 }); } },
-    ring(x, y, pal) { const n = low ? 34 : 54, tilt = rnd(.5, 1); for (let i = 0; i < n; i++) { const a = i / n * 6.283; add({ x, y, vx: Math.cos(a) * 190, vy: Math.sin(a) * 190 * tilt, g: 40, d: .982, l: 1, m: 1.7, c: pal[0], s: 12 }); } for (let i = 0; i < n / 2; i++) { const a = i / (n / 2) * 6.283 + .1; add({ x, y, vx: Math.cos(a) * 100, vy: Math.sin(a) * 100 * tilt, g: 40, d: .982, l: 1, m: 1.7, c: pal[1], s: 9 }); } },
-    willow(x, y) { const n = low ? 46 : 74, c = PAL[0]; for (let i = 0; i < n; i++) { const a = rnd(6.283), v = 60 + rnd(150); add({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 20, g: 135, d: .972, l: 1, m: rnd(2.4, 3.4), c: c[0], s: rnd(8, 13), cr: Math.random() < .12 }); } },
-    heart(x, y, pal) { const n = low ? 40 : 66; for (let i = 0; i < n; i++) { const t = i / n * 6.283, k = 9.5; add({ x, y, vx: 16 * Math.sin(t) ** 3 * k, vy: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * k, g: 22, d: .988, l: 1, m: 2, c: i % 2 ? pal[0] : pal[1], s: 12 }); } },
-    star(x, y, pal) { const m = 5, n = low ? 40 : 60; for (let i = 0; i < n; i++) { const a = i / n * 6.283, r = 1 / (1 + .55 * Math.abs(Math.cos(a * m / 2 + Math.PI / 2 * 0))); add({ x, y, vx: Math.cos(a - Math.PI / 2) * 210 * r, vy: Math.sin(a - Math.PI / 2) * 210 * r, g: 50, d: .982, l: 1, m: 1.8, c: pal[i % 2], s: 11 }); } }
-  };
-  const TYPES = ["peony", "peony", "ring", "willow", "heart", "star"];
-  function explode(x, y, type, big) { const pal = pick(PAL); (A[type || pick(TYPES)])(x, y, pal); F.push({ x, y, l: 1, c: pal[0], s: big ? 420 : 300 }); }
-  function launch(tx, type, big) { const T = rnd(.85, 1.2), y0 = H + 10, ty = H * rnd(.16, .46); R.push({ x: tx, y: y0, vx: rnd(-18, 18), vy: (ty - y0) / T, t: 0, T, type, big }); }
-
-  /* ---------- 主循环 ---------- */
-  function loop(now) {
-    raf = requestAnimationFrame(loop); const dt = Math.min((now - last) / 1000, .04); last = now; if (document.hidden) return;
-    cx.globalCompositeOperation = "destination-out"; cx.fillStyle = "rgba(0,0,0,.2)"; cx.fillRect(0, 0, W, H); cx.globalCompositeOperation = "lighter";
-    if (plan) { const e = (now - plan.t0) / 1000; while (plan.q.length && plan.q[0][0] <= e) { const j = plan.q.shift(); launch(j[1] * W, j[2], j[3]); } if (!plan.q.length && !R.length) plan.over = true; }
-    if (V) { // 吸入旋涡：粒子绕着书旋转并不断收紧
-      V.t -= dt; if (V.t > 0) for (let i = 0; i < (low ? 3 : 6); i++) add({ vort: 1, cx: V.x, cy: V.y, r: rnd(90, Math.max(W, H) * .5), a: rnd(6.283), w: rnd(2.2, 4.2), l: 1, c: pick([PAL[0][0], PAL[3][0], PAL[2][0], "255,255,255"]), s: rnd(8, 16) });
-      else if (!P.length) { unmount(); return; }
-    }
-    for (let i = R.length - 1; i >= 0; i--) { // 升空的火箭
-      const r = R[i]; r.t += dt; r.x += r.vx * dt; r.y += r.vy * dt; r.vy += 60 * dt;
-      if (Math.random() < .8) add({ x: r.x, y: r.y, vx: rnd(-12, 12), vy: rnd(10, 40), g: 0, d: .95, l: 1, m: .4, c: "255,225,170", s: 6 });
-      cx.globalAlpha = 1; cx.drawImage(sprite("255,240,200"), r.x - 8, r.y - 8, 16, 16);
-      if (r.t >= r.T) { explode(r.x, r.y, r.type, r.big); R.splice(i, 1); }
-    }
-    for (let i = F.length - 1; i >= 0; i--) { const f = F[i]; f.l -= dt * 4.5; if (f.l <= 0) { F.splice(i, 1); continue; } cx.globalAlpha = f.l * .3; cx.drawImage(sprite(f.c), f.x - f.s / 2, f.y - f.s / 2, f.s, f.s); } // 爆炸瞬间的光晕
-    for (let i = P.length - 1; i >= 0; i--) {
-      const p = P[i];
-      if (p.vort) { p.a += p.w * dt; p.r -= (p.r * 1.25 + 30) * dt; if (p.r < 6) { P.splice(i, 1); continue; } const x = p.cx + Math.cos(p.a) * p.r, y = p.cy + Math.sin(p.a) * p.r * .72, s = p.s * Math.min(1, p.r / 90) + 3; cx.globalAlpha = Math.min(1, p.r / 60); cx.drawImage(sprite(p.c), x - s / 2, y - s / 2, s, s); continue; }
-      p.l -= dt / p.m; if (p.l <= 0) { if (p.cr) for (let k = 0; k < 4; k++) add({ x: p.x, y: p.y, vx: rnd(-60, 60), vy: rnd(-60, 60), g: 60, d: .96, l: 1, m: .5, c: "255,255,255", s: 6 }); P.splice(i, 1); continue; }
-      p.vy += p.g * dt; const dr = Math.pow(p.d, dt * 60); p.vx *= dr; p.vy *= dr; p.x += p.vx * dt; p.y += p.vy * dt;
-      const tw = p.l < .5 && Math.random() < .25 ? .35 : 1, s = p.s * (.55 + .45 * p.l); cx.globalAlpha = Math.min(1, p.l * 1.7) * tw; cx.drawImage(sprite(p.c), p.x - s / 2, p.y - s / 2, s, s);
-    }
-    cx.globalAlpha = 1; if (plan && plan.over && !P.length && !R.length && !F.length) unmount();
-  }
-
-  /* ---------- 对外接口 ---------- */
-  return {
-    /** 烟花秀：约 7 秒；finale=true 时开场齐射、结尾大合唱 */
-    fireworks({ finale = false } = {}) {
-      return new Promise(res => {
-        if (matchMedia("(prefers-reduced-motion:reduce)").matches) return res();
-        if (resolveFn) resolveFn(); resolveFn = res; mount(); const q = []; let t = .2;
-        if (finale) for (let i = 0; i < 5; i++) q.push([.3 + i * .08, .12 + i * .19, i === 2 ? "heart" : "peony", true]);
-        for (let i = 0; i < (low ? 8 : 12); i++) { q.push([t, rnd(.12, .88), pick(TYPES), false]); t += rnd(low ? .55 : .4, low ? .95 : .72); }
-        if (finale) for (let i = 0; i < 8; i++) q.push([t + .6 + i * .07, .08 + i * .12, pick(TYPES), true]);
-        q.sort((a, b) => a[0] - b[0]); plan = { t0: performance.now(), q, over: false };
-      });
-    },
-    /** 吸入旋涡：粒子围绕 (x,y) 旋转收紧，持续 ms 毫秒 */
-    vortex(x, y, ms = 1500) { return new Promise(res => { if (matchMedia("(prefers-reduced-motion:reduce)").matches) return res(); if (resolveFn) resolveFn(); resolveFn = res; mount(); V = { x, y, t: ms / 1000 }; }); },
-    stop: unmount
-  };
-})();
-
-</script>
+<script src="photos.js"></script>
+<script src="stories.js"></script>
 <script>
 /* ========== 配置区：只需改这里 ========== */
 const SITE = { title: "我的照片墙", titleEn: "My Photo Wall", subtitle: "把值得记住的瞬间，挂在墙上" };
@@ -448,8 +59,8 @@ const CATEGORY_ORDER = [];
 // 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
 const ORIGINALS_ONLINE = true;
 // 点赞与访客弹幕的后台地址。也可以填完整网址，例如 "https://api.你的域名.com"
-const TAROT_URL = "tarot/"; // 塔罗占卜页面（React Three Fiber 版，打包后放在网站根目录的 tarot 文件夹）
-const API = ""; // 推荐："/api"（给 Worker 添加路由 你的域名/api/*，和网站同域，国内也能用）。留空 = 本地演示模式
+const TAROT_URL = "tarot/index.html"; // 塔罗占卜页面
+const API = "/api"; // 推荐："/api"（给 Worker 添加路由 你的域名/api/*，和网站同域，国内也能用）。留空 = 本地演示模式
 
 // 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
 const DANMAKU = {
@@ -873,68 +484,30 @@ addEventListener("keydown", e => {
 });
 console.log("%c悄悄告诉你：连点标题 5 下试试 🎆", "color:#c0714a;font-size:14px");
 
-/* ===== 命运之书入口：真实 three.js 星门穿越 → 进入塔罗页 ===== */
-// three.js 优先用网站根目录的 three.min.js（国内最稳），失败再回退到公共 CDN
-const THREE_SRC = ["three.min.js", "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js", "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"];
-let threeP;
-const loadThree = () => threeP || (threeP = new Promise((ok, no) => {
-  if (window.THREE) return ok(); let i = 0;
-  (function n() { if (i >= THREE_SRC.length) { threeP = null; return no(); } const sc = document.createElement("script"); sc.src = THREE_SRC[i++]; sc.onload = () => (window.THREE ? ok() : n()); sc.onerror = n; document.head.appendChild(sc); })();
-}));
-// 星门：金色粒子从四面八方螺旋着被吸进魔法书，随后冲进隧道；消失点正好对准魔法书所在的位置
-function warp(bx, by) {
-  const cv = el("canvas"); cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:33;pointer-events:none"; document.body.append(cv);
-  const W = innerWidth, H = innerHeight, R = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true });
-  R.setPixelRatio(Math.min(devicePixelRatio, 1.75)); R.setSize(W, H); R.setClearColor(0x000000, 0);
-  const S = new THREE.Scene(), cam = new THREE.PerspectiveCamera(70, W / H, .1, 200), U = { uT: { value: 0 }, uTravel: { value: 0 }, uPR: { value: R.getPixelRatio() } };
-  cam.setViewOffset(W, H, W / 2 - bx, H / 2 - by, W, H);   // 把镜头的“正前方”平移到魔法书的屏幕位置
-  const N = 2600, g = new THREE.BufferGeometry(), a = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) a.set([Math.random() * 6.2832, .6 + Math.pow(Math.random(), .7) * 7, Math.random()], i * 3);   // 每个粒子：[角度, 半径, 深度]，位置全部在着色器里算
-  g.setAttribute("position", new THREE.BufferAttribute(a, 3));
-  const pts = new THREE.Points(g, new THREE.ShaderMaterial({ uniforms: U, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: `uniform float uT,uTravel,uPR;varying vec3 vC;varying float vA;
-    void main(){float z=-mod(position.z*80.-uTravel,80.),d=-z;float ang=position.x+uT*.7+d*.045*(1.+uT*.3);
-    float r=position.y*(1.+d*.012)*mix(2.6,.45,smoothstep(0.,1.4,uT));
-    gl_Position=projectionMatrix*modelViewMatrix*vec4(cos(ang)*r,sin(ang)*r,z,1.);
-    gl_PointSize=min(26.,uPR*(1.5+(1.-d/80.)*6.5));vA=smoothstep(80.,60.,d)*smoothstep(0.,5.,d);
-    vC=mix(vec3(1.,.86,.55),vec3(1.,.97,.85),fract(position.x*3.1));}`,
-    fragmentShader: "varying vec3 vC;varying float vA;void main(){float a=smoothstep(.5,0.,length(gl_PointCoord-.5));gl_FragColor=vec4(vC,a*a*vA);}" }));
-  pts.frustumCulled = false; S.add(pts);
-  const rg = [0, 1].map(i => { const m = new THREE.Mesh(new THREE.RingGeometry(.93, 1, 96), new THREE.MeshBasicMaterial({ color: i ? 0xfff0c4 : 0xe9c97f, transparent: true, opacity: .85, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); m.position.z = -8; S.add(m); return m; });
-  const c = el("canvas"); c.width = c.height = 128; const x = c.getContext("2d"), gr = x.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, "rgba(255,245,215,1)"); gr.addColorStop(.35, "rgba(240,190,100,.55)"); gr.addColorStop(1, "rgba(240,190,100,0)"); x.fillStyle = gr; x.fillRect(0, 0, 128, 128);
-  const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); gl.position.z = -9; S.add(gl);
-  const st = performance.now(); let last = st;
-  (function f() {
-    const now = performance.now(), t = (now - st) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
-    U.uT.value = t; U.uTravel.value += dt * (5 + t * t * 26);
-    const e = Math.pow(Math.min(1, t / 1.7), 3);
-    rg.forEach((m, i) => { m.scale.setScalar(.5 + e * (i ? 22 : 30) + Math.sin(t * 3 + i) * .03); m.rotation.z = t * (i ? -.8 : .6); });
-    gl.scale.setScalar(2 + e * 40); gl.material.opacity = .4 + .6 * Math.min(1, t / 1.8);
-    R.render(S, cam);
-    if (t < 2.2) requestAnimationFrame(f); else { R.dispose(); cv.remove(); }
-  })();
-}
+/* ===== 命运之书入口：被魔法书吸进去 → 进入塔罗页（页面整体旋转着缩进书里） ===== */
 async function enterTarot() {
   if (entering || bOpen) return; entering = true;
   const go = () => { try { sessionStorage.setItem("pwTarot", "1"); } catch (e) {} location.href = TAROT_URL; };
   if (reduceMo()) return go();
-  const t0 = performance.now(), gate = $("tarotGate"), bk = gate.querySelector(".bk"), g = bk.getBoundingClientRect(), vis = g.bottom > 40 && g.top < innerHeight - 40;
-  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, th = loadThree().then(() => true, () => false), clone = bk.cloneNode(true);
+  const gate = $("tarotGate"), bk = gate.querySelector(".bk"), g = bk.getBoundingClientRect(), vis = g.bottom > 40 && g.top < innerHeight - 40;
+  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, fx = loadFx().catch(() => null), clone = bk.cloneNode(true);
   clone.style.cssText = "position:fixed;z-index:34;margin:0;left:" + (bx - g.width / 2) + "px;top:" + (by - g.height / 2) + "px;width:" + g.width + "px;height:" + g.height + "px";
   document.body.append(clone); gate.style.visibility = "hidden"; document.body.classList.add("sucking");
-  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a140a,#030207 70%)"; document.body.append(dark);
+  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a0f4a,#050316 70%)"; document.body.append(dark);
   dark.animate([{ opacity: 0 }, { opacity: .96 }], { duration: 1300, easing: "ease-in", fill: "forwards" });
-  setTimeout(() => clone.classList.add("open"), 350);
-  if (await Promise.race([th, new Promise(r => setTimeout(() => r(false), 700))])) { try { warp(bx, by); } catch (e) {} }   // three.js 没来得及加载就跳过星门，其余动画照常
-  await new Promise(r => setTimeout(r, Math.max(0, 1250 - (performance.now() - t0))));
+  const w = $("pgw"), sy = scrollY, inner = el("div"); // 只把“当前这一屏”做成图层来旋转：整页很长，整体做图层会占用大量显存、容易卡
+  document.documentElement.style.overflowY = "scroll"; // 保留滚动条的位置，避免页面宽度变化引起重新排版
+  inner.style.transform = "translateY(" + -sy + "px)"; while (w.firstChild) inner.append(w.firstChild); w.append(inner);
+  w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;z-index:20;will-change:transform,opacity;transform-origin:" + bx + "px " + by + "px";
+  w.animate([{ transform: "rotate(0deg) scale(1)", opacity: 1 }, { transform: "rotate(540deg) scale(.03)", opacity: .1 }], { duration: 1500, easing: "cubic-bezier(.55,0,.85,.35)", fill: "forwards" });
+  setTimeout(() => clone.classList.add("open"), 350); fx.then(F => F && F.vortex(bx, by, 1500));
+  await new Promise(r => setTimeout(r, 1250));
   clone.animate([{ transform: "scale(1)" }, { transform: "scale(1.6)" }], { duration: 320, easing: "ease-out", fill: "forwards" });
-  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#f3d99b 60%)"; document.body.append(fl);
+  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#c9b6ff 60%)"; document.body.append(fl);
   fl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: "forwards" });
   await new Promise(r => setTimeout(r, 340)); go();
 }
 $("bTarot").onclick = enterTarot; $("tarotGate").onclick = enterTarot;
-["pointerenter", "touchstart"].forEach(ev => [$("bTarot"), $("tarotGate")].forEach(n => n.addEventListener(ev, () => loadThree().catch(() => {}), { once: true, passive: true })));   // 手指/鼠标一靠近就开始预加载 three.js
 addEventListener("pageshow", e => { if (e.persisted) location.reload(); }); // 从塔罗页按返回键回来时，重置页面状态
 try { if (sessionStorage.getItem("pwBack") === "1") { // 从塔罗页返回：页面从书里旋转着“吐”回来
   sessionStorage.removeItem("pwBack"); const w = $("pgw"), hs = document.documentElement.style;
