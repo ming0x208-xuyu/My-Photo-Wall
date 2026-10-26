@@ -1,0 +1,6 @@
+# 这些文件夹/文件只是源码或工具，不要上传到网站（放在“网站文件夹”的根目录）
+tarot-app
+migrate
+node_modules
+*.bak
+*.py

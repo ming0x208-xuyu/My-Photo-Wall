@@ -1,0 +1,49 @@
+/* 英文标题字体：把下载的字体放进 public/fonts/，文件名保持下面这样（或改这里的文件名） */
+@font-face{font-family:"TarotTitle";font-display:swap;
+  src:url("/fonts/CinzelDecorative-Bold.woff2") format("woff2"),url("/fonts/CinzelDecorative-Bold.ttf") format("truetype")}
+
+:root{--gold:#e9c97f;--gold2:#fff0c4;--ink:#050409;--mist:#d9d2bd}
+*{box-sizing:border-box}
+html,body,#root{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--mist);
+  font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;-webkit-tap-highlight-color:transparent}
+.cv{position:fixed;inset:0}.cv canvas{touch-action:none;display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+.back{position:fixed;z-index:3;top:calc(env(safe-area-inset-top,0px) + 12px);left:14px;padding:8px 6px;color:var(--mist);opacity:.75;text-decoration:none;font-size:14px;letter-spacing:.08em}
+.qline{position:fixed;z-index:2;top:calc(env(safe-area-inset-top,0px) + 16px);left:76px;right:24px;margin:0;text-align:center;font-size:14px;line-height:1.6;color:var(--gold);letter-spacing:.06em;opacity:0;transition:opacity 1s;pointer-events:none}
+.qline.on{opacity:.95}
+.hint{position:fixed;z-index:2;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);margin:0;text-align:center;font-size:15px;letter-spacing:.24em;color:var(--gold);pointer-events:none;transition:opacity .6s;animation:breathe 3.2s ease-in-out infinite}
+.hint.off{opacity:0}
+@keyframes breathe{50%{opacity:.45}}
+
+/* 底部面板：黑底 + 金色细线 */
+.sheet{position:fixed;z-index:3;left:0;right:0;bottom:0;max-height:52vh;overflow:auto;padding:18px 18px calc(env(safe-area-inset-bottom,0px) + 16px);
+  background:linear-gradient(#0a0910f2,#050409fa);border-top:1px solid rgba(233,201,127,.45);
+  transform:translateY(105%);transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.sheet.show{transform:none}
+.sheet h2{margin:0 0 14px;text-align:center;font-size:17px;font-weight:600;letter-spacing:.14em;color:var(--gold2)}
+.sheet h2 i{display:block;font:normal 700 13px "TarotTitle",Georgia,serif;color:var(--gold);letter-spacing:.55em;margin-bottom:5px}
+.sheet ul{list-style:none;margin:0 auto 14px;padding:0;max-width:560px;display:grid;gap:8px}
+.q{width:100%;text-align:left;line-height:1.5;letter-spacing:.04em;padding:11px 14px;border-radius:10px;background:transparent;border:1px solid rgba(233,201,127,.28);color:var(--mist);transition:.25s}
+.q:hover{border-color:rgba(233,201,127,.6)}
+.q.on{color:var(--gold2);border-color:var(--gold);background:rgba(233,201,127,.08);box-shadow:0 0 18px rgba(233,201,127,.15)}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+.ghost,.go{padding:10px 22px;border-radius:999px;letter-spacing:.1em;font-size:14px;text-decoration:none;background:transparent}
+.ghost{border:1px solid rgba(217,210,189,.35);color:var(--mist)}
+.go{border:1px solid var(--gold);color:var(--gold2);background:linear-gradient(#e9c97f22,#e9c97f0a)}
+.go:disabled{opacity:.3;cursor:default}
+.read{max-height:46vh}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px 24px;max-width:980px;margin:0 auto 12px}
+.cols h3{margin:0 0 4px;font-size:13px;font-weight:400;opacity:.7;letter-spacing:.14em}
+.cols h3 b{margin-left:10px;font-size:17px;font-weight:600;color:var(--gold);letter-spacing:.06em}
+.cols p{margin:0;font-size:14px;line-height:1.75}
+small{display:block;margin-top:10px;text-align:center;font-size:12px;opacity:.5}
+
+.flash{position:fixed;inset:0;z-index:6;background:#fff3d6;opacity:0;pointer-events:none;transition:opacity 1.6s}
+.flash.on{opacity:1}
+.cover{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:var(--ink);font-size:15px;letter-spacing:.24em;color:var(--gold);transition:opacity .9s}
+.cover.gone{opacity:0;pointer-events:none}
+.fade{position:fixed;inset:0;z-index:7;background:radial-gradient(circle,#fff3d6,#e9c97f);opacity:0;pointer-events:none;transition:opacity .55s}
+.fade.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.hint{animation:none}.sheet{transition:none}}

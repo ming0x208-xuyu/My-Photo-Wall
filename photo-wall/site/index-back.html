@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>我的照片墙</title>
+<meta name="description" content="把值得记住的瞬间，挂在墙上">
+<link rel="icon" href="data:,">
+<meta property="og:type" content="website">
+<meta property="og:title" content="我的照片墙">
+<meta property="og:description" content="把值得记住的瞬间，挂在墙上。来看看，也可以点个赞、留一条弹幕。">
+<meta property="og:image" content="https://mphotowall.com/og.jpg">
+<meta property="og:url" content="https://mphotowall.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="book.css">
+<link rel="stylesheet" href="style.css">
+<script>try{if(sessionStorage.getItem("pwBack")==="1")document.documentElement.classList.add("pwback")}catch(e){}</script>
+</head>
+<body>
+<div class="blobs"><i></i><i></i><i></i></div><div id="deskbg"></div>
+<svg id="wm" viewBox="0 0 83 92" aria-hidden="true">
+<g fill="none" stroke="currentColor"><circle cx="41.5" cy="41.5" r="38" stroke-width=".9"/><circle class="wr" cx="41.5" cy="41.5" r="33.6" stroke-width="2.4" stroke-dasharray=".6 2.62"/><path class="wk" d="M60 11v10M55 16h10" stroke-width=".9" stroke-linecap="round"/></g>
+<g fill="currentColor"><rect x="21.5" y="28" width="2.2" height="28"/><polygon points="21.5,28 27.2,28 42.4,56 36.7,56"/><polygon points="57,28 59.4,28 43.4,56 41,56"/><rect x="57" y="28" width="5" height="28"/><rect x="17.5" y="27" width="10" height="1.5"/><rect x="53" y="27" width="13" height="1.5"/><rect x="17.5" y="55" width="10" height="1.5"/><rect x="53" y="55" width="13" height="1.5"/><circle class="wd" cx="41.5" cy="36.5" r="3.4"/></g>
+<text x="41.5" y="89.5" text-anchor="middle" font-size="5" letter-spacing="1.5" fill="currentColor" font-family="ui-monospace,Menlo,Consolas,monospace">MPHOTOWALL</text></svg><div id="spot"></div><div id="pg"></div><div id="dm"></div>
+<div id="pgw">
+<header><h1 id="t"></h1><p id="te"></p><p id="s"></p></header>
+<div class="bar" id="bar"></div>
+<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip magic" id="bTarot">🔮 塔罗</button></div>
+<main class="wall" id="wall"></main>
+<div id="more"><p class="mz">更多的故事即将到来~</p><p class="me">More stories are on the way</p>
+<button id="tarotGate" class="gate" aria-label="命运之书 · 塔罗占卜"><span class="orbit"><i style="--k:0">✦</i><i style="--k:1">☾</i><i style="--k:2">✧</i><i style="--k:3">☉</i><i style="--k:4">✦</i><i style="--k:5">☽</i></span><div class="bk"><div class="bk-3d"><i class="bk-back"></i><i class="bk-pg p1"></i><i class="bk-pg p2"></i><i class="bk-pg p3"></i><div class="bk-cover"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="36"/><circle cx="50" cy="50" r="30" stroke-dasharray="1 3"/><path d="M50.0 24.0L53.8 40.8L68.4 31.6L59.2 46.2L76.0 50.0L59.2 53.8L68.4 68.4L53.8 59.2L50.0 76.0L46.2 59.2L31.6 68.4L40.8 53.8L24.0 50.0L40.8 46.2L31.6 31.6L46.2 40.8Z"/><path d="M88.0 50.0L96.0 50.0M86.7 59.8L91.5 61.1M82.9 69.0L89.8 73.0M76.9 76.9L80.4 80.4M69.0 82.9L73.0 89.8M59.8 86.7L61.1 91.5M50.0 88.0L50.0 96.0M40.2 86.7L38.9 91.5M31.0 82.9L27.0 89.8M23.1 76.9L19.6 80.4M17.1 69.0L10.2 73.0M13.3 59.8L8.5 61.1M12.0 50.0L4.0 50.0M13.3 40.2L8.5 38.9M17.1 31.0L10.2 27.0M23.1 23.1L19.6 19.6M31.0 17.1L27.0 10.2M40.2 13.3L38.9 8.5M50.0 12.0L50.0 4.0M59.8 13.3L61.1 8.5M69.0 17.1L73.0 10.2M76.9 23.1L80.4 19.6M82.9 31.0L89.8 27.0M86.7 40.2L91.5 38.9"/><path d="M50 40a10 10 0 1 0 0 20a6 10 0 1 1 0-20z" stroke-opacity=".0"/><circle cx="50" cy="50" r="3" fill="#ecd29a" stroke="none"/></svg></div></div><b class="bk-halo"></b></div><span class="gt">命运之书</span><span class="ge">Book of Fate · Tarot</span><span class="gh">轻触，翻开今日的牌</span></button>
+<p id="fp" class="fp" hidden>已有 <b id="fpn">0</b> 人在此留下足迹 👣</p></div>
+<footer id="f"></footer>
+</div>
+<div id="dock"><button id="dmt" class="sw on" aria-label="弹幕开关" title="开关弹幕"></button><b>弹幕</b><s></s><input id="dmin" maxlength="30" placeholder="说点什么，飘给大家看…" autocomplete="off"><button id="dmgo" aria-label="发送">↑</button></div>
+<button id="top" aria-label="回到顶部" title="回到顶部"><svg viewBox="0 0 48 48"><circle class="rg" cx="24" cy="24" r="21"/><circle class="rp" id="rp" cx="24" cy="24" r="21"/><path d="M17 28l7-7 7 7"/></svg></button><div id="vpl"><button id="bdBtn" title="拾光邮局 · Light Post"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>拾光邮局</span><b id="vcnt" hidden></b></button></div>
+<div id="vsw" role="tablist" aria-label="视图切换"><i id="vth"></i>
+<button id="vWall" class="on" title="瀑布流"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="10" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="6" rx="1.5"/><rect x="3.5" y="16.5" width="7" height="4" rx="1.5"/><rect x="13.5" y="12.5" width="7" height="8" rx="1.5"/></svg><span>瀑布流</span></button>
+<button id="vDesk" title="桌面模式"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="11" height="12" rx="1.5" transform="rotate(-9 9 12)"/><rect x="10" y="5" width="11" height="12" rx="1.5" transform="rotate(8 15.5 11)"/></svg><span>桌面</span></button></div><div id="toast"></div>
+<div id="curtain"></div>
+<section id="board" aria-label="拾光邮局 Light Post"><div class="bb"><i></i><i></i><i></i></div><div class="grain"></div>
+<button id="bback" aria-label="返回">← 返回照片墙</button>
+<div class="bscroll"><div class="bh"><p class="mono">// light post · est. 2026</p><h2>拾光邮局</h2><p class="mono" id="bsub"></p></div><div id="bgrid"></div><p id="bempty" class="mono" hidden>还没有来信，写下第一封吧 ✉<br>No letters yet — be the first to write</p></div>
+<div id="bcomp"><input id="bin" maxlength="80" placeholder="写一封信 · Write a letter…" autocomplete="off"><button id="bgo">寄出 ✈</button></div>
+<div id="ltr"><div class="lbd"></div><div id="lbig" class="env big"></div></div></section>
+<div id="lb"><button id="x">×</button><button id="pv">‹</button><button id="nx">›</button><i id="spin"></i><div id="acts"><a id="dl" hidden>⤓ 下载原图</a><button id="sh">⤴ 分享</button><button id="lk" class="lkb"></button></div><img id="lbi" alt=""><div id="lbc"></div></div>
+
+<script src="photos.js"></script>
+<script src="stories.js"></script>
+<script>
+/* ========== 配置区：只需改这里 ========== */
+const SITE = { title: "我的照片墙", titleEn: "My Photo Wall", subtitle: "把值得记住的瞬间，挂在墙上" };
+// 手动补充的照片（可选，一般不需要：用 build.py 自动生成即可）。tag 可以是 "旅行"，也可以是数组 ["旅行", "朋友"]
+const PHOTOS = [
+  // { src: "photos/sunset.jpg", title: "海边日落", tag: "旅行" },
+];
+// 分类按钮的显示顺序（可选）。分类就是 photos 下的子文件夹名；没写到的分类会排在后面
+const CATEGORY_ORDER = [];
+// 原图是否也部署到网上。false = 原图只留在你电脑里不上传，下载按钮改为下载 2000px 的高清 WebP；true = 原图也上传，可下载原格式
+const ORIGINALS_ONLINE = true;
+// 点赞与访客弹幕的后台地址。也可以填完整网址，例如 "https://api.你的域名.com"
+const TAROT_URL = "tarot.html"; // 塔罗占卜页面
+const API = "/api"; // 推荐："/api"（给 Worker 添加路由 你的域名/api/*，和网站同域，国内也能用）。留空 = 本地演示模式
+
+// 弹幕文案：想加几条就加几条，打开网站时会从右向左依次飘过
+const DANMAKU = {
+  enabled: true,
+  gap: 1300, // 每条弹幕的发射间隔（毫秒），越小越密
+  texts: [
+    "愿你被这个世界温柔以待",
+    "把平凡的日子，过成值得回忆的样子",
+    "每一帧，都是时间留下的光",
+    "此刻，也终将成为珍贵的回忆",
+    "慢慢来，好看的风景都在路上",
+  ],
+};
+/* ====================================== */
+
+const $ = id => document.getElementById(id);
+const tagsOf = p => [].concat(p.tag || []);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x) e.textContent = x; return e; };
+const info = p => Object.assign({}, p.info, (window.STORIES || {})[p.src.replace(/^photos\//, "")] || (window.STORIES || {})[p.title]); // 照片小故事：build.py 自动生成，stories.js 可手动覆盖
+const pid = p => p.id || p.src;
+const fmtDate = d => (d || "").replace(/^(\d{4})-(\d+)-(\d+)$/, (m, y, mo, da) => y + "年" + +mo + "月" + +da + "日");
+const store = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} return null; };
+const DEMO_STORY = ["这天在海边等了两小时日落，云一直不散，最后收工前一分钟，光突然透出来了。", "路边随手拍的，后来发现是整趟旅行里我最喜欢的一张。", "朋友说我拍照时表情最认真，其实我只是在等一个对的光。", "那天风很大，帽子飞了，但笑声一直没停。", "下班路上看到的天色，忍不住停下来拍了一张。", "一杯咖啡，一段发呆的时间，刚刚好。"];
+const u = s => /^(data|blob):/.test(s) ? s : s.split("/").map(encodeURIComponent).join("/"); // 路径转义，支持中文和空格
+let list = (window.PHOTOS_BUILT || []).concat(PHOTOS), cur = "全部", shown = [], idx = 0, io, lz, tok = 0, dmOn = DANMAKU.enabled,
+  lbList = [], lbBadge = "", desk = false, z = 10, lastSend = 0, likes = {}, mine = {}, visitorDm = [], msgs = [], fireDm = () => {};
+document.title = SITE.title + (SITE.titleEn ? " · " + SITE.titleEn : ""); [...SITE.title].forEach((c, i) => { const s = document.createElement("span"); s.className = "ch"; s.textContent = c === " " ? "\u00a0" : c; s.style.animationDelay = i * 90 + "ms"; $("t").appendChild(s); }); $("s").textContent = SITE.subtitle; $("te").textContent = SITE.titleEn || "";
+$("f").textContent = "© " + new Date().getFullYear() + " " + SITE.title;
+
+if (!list.length) { // 没有照片时显示精致的示例占位图
+  const PAL = [["#f2d4c2", "#d08461", "#6e3a46"], ["#cddfee", "#6f93c2", "#27345e"], ["#dde7cf", "#8aa77c", "#33513f"],
+               ["#f1d1dc", "#c47c9b", "#51325f"], ["#ecdcb8", "#c39a4f", "#53401f"], ["#cfd3ea", "#8173c4", "#262345"]];
+  list = Array.from({ length: 16 }, (_, i) => {
+    const h = [320, 440, 540, 380, 480][i % 5], c = PAL[i % 6], n = String(i + 1).padStart(2, "0"), tag = ["旅行", "日常", "人像"][i % 3];
+    const g = (id, x, y, r, col) => `<radialGradient id='${id}' cx='${x}%' cy='${y}%' r='${r}%'><stop offset='0' stop-color='${col}'/><stop offset='1' stop-color='${col}' stop-opacity='0'/></radialGradient>`;
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='${h}' viewBox='0 0 400 ${h}'><defs>${g("a", 82, 8, 85, c[0])}${g("b", 90, 60, 80, c[1])}${g("c", 25, 105, 100, c[2])}<filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/></filter></defs>`
+      + `<rect width='400' height='${h}' fill='${c[1]}'/><rect width='400' height='${h}' fill='url(#c)'/><rect width='400' height='${h}' fill='url(#b)' opacity='.7'/><rect width='400' height='${h}' fill='url(#a)'/><rect width='400' height='${h}' filter='url(#n)'/>`
+      + `<rect x='14' y='14' width='372' height='${h - 28}' rx='8' fill='none' stroke='#fff' stroke-opacity='.4'/><line x1='32' y1='${h - 74}' x2='72' y2='${h - 74}' stroke='#fff' stroke-opacity='.7'/>`
+      + `<text x='32' y='52' fill='#fff' fill-opacity='.9' font-family='Georgia,serif' font-size='13' letter-spacing='5'>NO. ${n}</text>`
+      + `<text x='32' y='${h - 42}' fill='#fff' font-family='Georgia,serif' font-size='23' letter-spacing='4'>等待一张照片</text>`
+      + `<text x='32' y='${h - 22}' fill='#fff' fill-opacity='.75' font-family='Georgia,serif' font-size='11' letter-spacing='5'>${tag}</text></svg>`;
+    return { src: "data:image/svg+xml," + encodeURIComponent(svg), w: 400, h, demo: true, id: "demo-" + n, likes0: (i * 7 + 3) % 31 + 2, title: "示例 " + n, tag,
+      info: { text: DEMO_STORY[i % 6], date: "2026-0" + (i % 9 + 1) + "-" + (10 + i), place: ["厦门", "京都", "大理", "青岛", "台北", "成都"][i % 6] } };
+  });
+}
+
+function bar() {
+  const all = [...new Set(list.flatMap(tagsOf))],
+    tags = ["全部", ...CATEGORY_ORDER.filter(t => all.includes(t)), ...all.filter(t => !CATEGORY_ORDER.includes(t))];
+  $("bar").innerHTML = "";
+  tags.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "chip" + (t === cur ? " on" : ""); b.textContent = t;
+    b.onclick = () => { cur = t; bar(); wall(); };
+    $("bar").appendChild(b);
+  });
+}
+
+function wall() {
+  shown = list.filter(p => cur === "全部" || tagsOf(p).includes(cur));
+  const w = $("wall"); w.innerHTML = ""; w.style.height = ""; w.classList.toggle("desk", desk);
+  if (io) io.disconnect();
+  io = new IntersectionObserver(es => { // 同一批进入视野的卡片，按位置依次显现
+    es.filter(e => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left)
+      .forEach((e, k) => {
+        const d = e.target; io.unobserve(d);
+        d.style.transitionDelay = d.style.animationDelay = k * 120 + "ms"; d.classList.add("in");
+        setTimeout(() => { d.classList.add("done"); d.style.transitionDelay = ""; }, k * 120 + 1000);
+      });
+  }, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
+  if (lz) lz.disconnect();
+  lz = new IntersectionObserver(es => es.forEach(e => { // 卡片进入视野（提前 600px）才开始下载缩略图
+    if (!e.isIntersecting) return;
+    lz.unobserve(e.target);
+    const im = e.target.querySelector("img"); im.src = im.dataset.src;
+  }), { rootMargin: "600px 0px" });
+  if (!shown.length) { w.innerHTML = "<div class='empty'>这里还没有照片</div>"; return; }
+  shown.forEach((p, i) => {
+    const d = document.createElement("figure");
+    d.className = "item"; d.style.setProperty("--r", (Math.random() * 6 - 3).toFixed(1) + "deg");
+    const im = new Image(); im.alt = p.title || ""; im.decoding = "async"; im.dataset.src = u(p.thumb || p.src);
+    im.onload = () => im.classList.add("ok");
+    const known = p.w && p.h;
+    if (known) { d.style.aspectRatio = d.style.getPropertyValue("--ar") || p.w + " / " + p.h; d.style.setProperty("--ar", p.w + " / " + p.h); if (p.color) d.style.background = p.color; } // 先占好位置，避免加载时页面抖动
+    d.append(im);
+    const tt = info(p).title || p.title;
+    if (tt) { const c = document.createElement("div"); c.className = "cap"; c.textContent = tt; d.append(c); }
+    const dt = info(p).date; if (dt) d.append(el("div", "stamp", "'" + dt.slice(2).replace(/-/g, " "))); // 桌面模式的胶片日期戳
+    const k = el("button", "lkb"); k._p = p; heart(k); k.onpointerdown = e => e.stopPropagation(); k.onclick = e => { e.stopPropagation(); toggleLike(p); }; d.append(k);
+    d.onclick = () => { if (d._m) { d._m = false; return; } open(i, shown); };
+    dragify(d);
+    w.appendChild(d); io.observe(d);
+    if (known) lz.observe(d); else im.src = im.dataset.src;
+  });
+  if (desk) layoutDesk(true);
+}
+
+function loadBig(p, my, src, tries) { // 后台下载高清图：失败自动重试、改用原图，15 秒还没好就不再模糊
+  const im = $("lbi"), b = new Image(); loadBig.keep = b; // 留住引用，避免被浏览器提前回收导致 onload 不触发
+  const done = ok => { if (my !== tok) return; $("lb").classList.remove("busy"); im.classList.remove("ld"); if (ok) im.src = u(src); };
+  b.onload = () => (b.decode ? b.decode().catch(() => {}) : Promise.resolve()).then(() => done(true));
+  b.onerror = () => {
+    if (my !== tok) return;
+    if (tries < 1) return setTimeout(() => loadBig(p, my, src, 1), 600);
+    if (ORIGINALS_ONLINE && p.src !== src) return loadBig(p, my, p.src, 1);
+    done(false);
+  };
+  b.src = u(src) + (tries ? "?r=" + Date.now() : "");
+  if (!tries) setTimeout(() => { if (my === tok) { im.classList.remove("ld"); $("lb").classList.remove("busy"); } }, 15000);
+}
+function open(i, arr) {
+  if (arr) lbList = arr;
+  idx = (i + lbList.length) % lbList.length;
+  const p = lbList[idx], im = $("lbi"), my = ++tok, small = p.thumb || p.src, big = p.large || p.src, inf = info(p), badge = lbBadge; lbBadge = "";
+  im.classList.remove("pop"); void im.offsetWidth; im.classList.add("pop");
+  im.src = u(small); // 先显示已缓存的缩略图，高清图下载完再替换
+  const need = big !== small; im.classList.toggle("ld", need); $("lb").classList.toggle("busy", need);
+  if (need) loadBig(p, my, big, 0);
+  const dl = $("dl"), up = ORIGINALS_ONLINE || !p.large, file = up ? p.src : p.large;
+  dl.hidden = !!p.demo; dl.href = u(file); dl.textContent = up ? "⤓ 下载原图" : "⤓ 下载高清图";
+  dl.download = p.name || (up ? file.split("/").pop() : (p.title || "photo") + ".webp");
+  $("pv").style.display = $("nx").style.display = lbList.length > 1 ? "" : "none";
+  $("lbc").replaceChildren(el("div", "lt", badge + (inf.title || p.title || "")), el("div", "lm", [fmtDate(inf.date), inf.place].filter(Boolean).join(" · ")), el("div", "ls", inf.text), el("div", "lx", inf.meta), el("div", "ln", (idx + 1) + " / " + lbList.length));
+  $("lk")._p = p; refreshLikes();
+  $("lb").classList.add("on");
+}
+const close = () => $("lb").classList.remove("on");
+$("x").onclick = close; $("pv").onclick = e => { e.stopPropagation(); open(idx - 1); };
+$("nx").onclick = e => { e.stopPropagation(); open(idx + 1); };
+$("lb").onclick = e => { if (e.target.id === "lb") close(); };
+addEventListener("keydown", e => { if (!$("lb").classList.contains("on")) return;
+  if (e.key === "Escape") close(); if (e.key === "ArrowLeft") open(idx - 1); if (e.key === "ArrowRight") open(idx + 1); });
+let sx = 0;
+$("lb").addEventListener("touchstart", e => sx = e.touches[0].clientX);
+$("lb").addEventListener("touchend", e => { const d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) open(idx + (d < 0 ? 1 : -1)); });
+
+$("top").onclick = () => scrollTo({ top: 0, behavior: "smooth" });
+const hd = document.querySelector("header");
+addEventListener("scroll", () => {
+  const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  $("top").classList.toggle("show", y > innerHeight); // 下滑超过一屏才显示
+  document.body.classList.toggle("isl", y > innerHeight * (document.body.classList.contains("isl") ? .85 : 1)); // 手机：超过一屏后顶部按钮变成低调样式（带回滞，避免来回抖）
+  document.body.classList.add("sc"); clearTimeout(scT); scT = setTimeout(() => document.body.classList.remove("sc"), 650); // 正在滚动时更淡
+  $("rp").style.strokeDashoffset = 131.95 * (1 - (h > 0 ? y / h : 0)); // 圆环 = 阅读进度
+  $("pg").style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+  hd.style.transform = "translateY(" + y * .3 + "px)"; hd.style.opacity = Math.max(0, 1 - y / 500);
+}, { passive: true });
+
+function danmaku() {
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const box = $("dm"), narrow = innerWidth < 600, H = narrow ? 38 : 46, N = Math.max(3, Math.floor(innerHeight * .62 / H)), busy = Array(N).fill(0);
+  let active = 0;
+  const cap = () => DANMAKU.max || Math.min(6, Math.max(3, Math.round(innerWidth / 260))); // 同屏最多几条：手机 3 条，电脑 4–6 条
+  fireDm = (text, kind) => { // kind: 0 站长文案 / 1 访客弹幕 / 2 我刚发的 / 3 刚同步到的新弹幕（2、3 不受同屏上限限制，立刻飘出）
+    if (kind < 2 && active >= cap()) return false;
+    const now = Date.now(), free = busy.map((t, i) => t < now ? i : -1).filter(i => i >= 0);
+    if (!free.length && kind < 2) return false;
+    const lane = free.length ? free[Math.random() * free.length | 0] : busy.indexOf(Math.min(...busy));
+    const e = el("div", "dmk" + ["", " vis", " mine", " vis"][kind], (kind === 1 || kind === 3 ? "💬 " : "") + text);
+    e.style.top = "calc(9vh + " + lane * H + "px)"; e.style.fontSize = ((narrow ? 13 : 14) + Math.random() * 4).toFixed(1) + "px";
+    box.appendChild(e);
+    const w = e.offsetWidth, dur = 9 + Math.random() * 4, sp = (innerWidth + w) / dur; // 穿过屏幕的时间固定为 9–13 秒，手机和电脑疏密一致
+    e.style.animationDuration = dur + "s"; busy[lane] = now + (w + 60) / sp * 1000; active++;
+    e.onanimationend = () => { e.remove(); active--; };
+    return true;
+  };
+  const tick = () => {
+    if (!dmOn || document.hidden) return;
+    const all = DANMAKU.texts.map(t => [t, 0]).concat(visitorDm.map(t => [t, 1]));
+    if (all.length) { const it = all[Math.random() * all.length | 0]; fireDm(it[0], it[1]); }
+  };
+  setTimeout(() => { [0, 350, 800].forEach(d => setTimeout(tick, d)); setInterval(tick, DANMAKU.gap || 900); }, 500);
+}
+
+/* ===== 点赞 / 访客弹幕 ===== */
+async function api(path, body) { // 没配置 API 时返回 null，页面自动用本地演示模式
+  if (!API) return null;
+  const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 6000); // 6 秒没响应就放弃，不让页面一直等
+  try { const r = await fetch(API.replace(/\/+$/, "") + path, Object.assign({ signal: ac.signal }, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {})); return await r.json(); } catch (e) { return null; } finally { clearTimeout(tm); }
+}
+const cnt = p => (likes[pid(p)] || 0) + (p.likes0 || 0);
+function heart(b) { const p = b._p; if (!p) return; const n = cnt(p), on = !!mine[pid(p)]; b.textContent = (on ? "♥" : "♡") + (n ? " " + n : ""); b.classList.toggle("on", on); }
+const refreshLikes = () => document.querySelectorAll(".lkb").forEach(heart);
+function toggleLike(p) {
+  const id = pid(p), on = !mine[id];
+  if (on) mine[id] = 1; else delete mine[id];
+  likes[id] = Math.max(0, (likes[id] || 0) + (on ? 1 : -1));
+  store("pw-mine", mine); if (API) api("/like", { id, d: on ? 1 : -1 }); else store("pw-likes", likes);
+  refreshLikes();
+  document.querySelectorAll(".lkb").forEach(b => { if (b._p === p) { b.classList.remove("hp"); void b.offsetWidth; b.classList.add("hp"); } });
+}
+let tto; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tto); tto = setTimeout(() => t.classList.remove("on"), 2600); }
+const seenDm = new Set();
+function updCnt() { const n = msgs.length, c = $("vcnt"); c.textContent = n > 99 ? "99+" : n; c.hidden = !n; }
+function submitMsg(raw) { // 弹幕输入框和拾光邮局共用：校验 → 本地立刻显示 → 异步保存到后台
+  const t = raw.trim().slice(0, 80); if (!t) return false;
+  if (/https?:|www\.|微信|vx|加我/i.test(t)) { toast("不能包含链接或联系方式哦"); return false; }
+  if (Date.now() - lastSend < 8000) { toast("发得有点快，稍等几秒再发～"); return false; }
+  lastSend = Date.now(); if (!dmOn) setDm(true);
+  fireDm(t, 2); visitorDm.push(t); seenDm.add(t); msgs.push({ t, ts: Date.now() }); updCnt();
+  if (!API) { store("pw-vdm", msgs.filter(x => !x.demo).slice(-60)); toast("已发送（还没配置后台，目前只有你自己能看到）"); return true; }
+  api("/danmaku", { text: t }).then(r => toast(r && r.ok ? "已发送，大家都能看到啦 ✓" : r && r.error === "rate" ? "发得有点快，稍后再试" : r && r.error === "bad" ? "内容不能包含链接或联系方式" : "没能保存到服务器，别人暂时看不到（请检查后台配置）"));
+  return true;
+}
+function sendDm() { const inp = $("dmin"); if (submitMsg(inp.value)) { inp.value = ""; inp.blur(); } }
+mine = store("pw-mine") || {};
+/* ===== 足迹：已有 N 人在此留下足迹（服务器按 IP 去重，每个 IP 只记一次） ===== */
+let fpVal = 0, fpDone = 0;
+const fpIO = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting || fpDone) return; fpDone = 1; fpIO.disconnect();
+  const t0 = performance.now(), n = $("fpn"), step = t => { const k = Math.min(1, (t - t0) / 1300); n.textContent = Math.round(fpVal * (1 - Math.pow(1 - k, 3))).toLocaleString("zh-CN"); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}), { threshold: .6 });
+function showFp(n) { n = Math.floor(+n); if (!(n > 0)) return; fpVal = n; $("fp").hidden = false; if (fpDone) $("fpn").textContent = n.toLocaleString("zh-CN"); else fpIO.observe($("fp")); }
+const DEMO_MSGS = ["第一次来，好好看！", "这张好有感觉～", "路过，留个脚印 👣", "好想去这个地方！", "光线太温柔了，像一封写给夏天的信", "朋友推荐来的，已经收藏了！", "每一张都像电影截图", "谢谢你把日子拍得这么好看", "夜里刷到这里，莫名被治愈了"];
+function applyState(d, first) { // 同步服务器上的点赞数和访客弹幕；新来的弹幕立刻飘出来
+  if (d.likes) likes = d.likes; refreshLikes(); if (d.visitors != null) showFp(d.visitors);
+  const fresh = [];
+  (d.danmaku || []).forEach(x => { if (seenDm.has(x.t)) return; seenDm.add(x.t); visitorDm.push(x.t); msgs.push({ t: x.t, ts: x.ts || Date.now() }); if (!first) fresh.push(x.t); });
+  fresh.slice(-4).forEach((t, i) => setTimeout(() => fireDm(t, 3), i * 900)); updCnt();
+}
+if (API) { const pull = first => api("/").then(d => d && !d.error && applyState(d, first)); pull(true); setInterval(() => { if (!document.hidden) pull(false); }, 30000);
+  if (!store("pw-visited")) api("/visit", {}).then(r => { if (r && r.ok) { store("pw-visited", 1); showFp(r.count); } }); // 记一次足迹
+}
+else {
+  likes = store("pw-likes") || {};
+  msgs = (store("pw-vdm") || []).map(x => typeof x === "string" ? { t: x, ts: Date.now() - 864e5 } : x);
+  if (list.some(p => p.demo)) msgs = msgs.concat(DEMO_MSGS.map((t, k) => ({ t, ts: Date.now() - (k * 1.7 + .3) * 864e5, demo: 1 })));
+  visitorDm = msgs.map(m => m.t); msgs.forEach(m => seenDm.add(m.t)); updCnt();
+  if (list.some(p => p.demo)) showFp(1286); // 演示数字
+}
+$("lk").onclick = () => toggleLike(lbList[idx]);
+$("dmgo").onclick = sendDm; $("dmin").onkeydown = e => { if (e.key === "Enter") sendDm(); };
+
+/* ===== 每日一图 / 随机 / 分享 ===== */
+$("bDaily").onclick = () => { const d = new Date(); lbBadge = "☀ 今日一图 · "; open(0, [list[(d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) % list.length]]); };
+$("bRand").onclick = () => { lbBadge = "🎲 随机一张 · "; open(0, [list[Math.random() * list.length | 0]]); };
+$("sh").onclick = async () => {
+  const p = lbList[idx], btn = $("sh"), url = location.href.split("#")[0] + "#" + encodeURIComponent(pid(p));
+  if (navigator.share && matchMedia("(pointer:coarse)").matches) { // 手机：调出系统分享面板
+    try { await navigator.share({ title: SITE.title, text: (info(p).title || p.title || "") + " · " + SITE.title, url }); return; } catch (e) { if (e.name === "AbortError") return; }
+  }
+  let ok = false; // 电脑：复制链接（剪贴板不可用时换备用方法）
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {
+    const t = el("textarea"); t.value = url; t.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(t); t.select();
+    try { ok = document.execCommand("copy"); } catch (e2) {} t.remove();
+  }
+  if (!ok) { prompt("复制这个链接分享：", url); return; }
+  btn.textContent = "✓ 已复制链接"; toast("链接已复制，发给朋友就能直接看到这张照片"); setTimeout(() => btn.textContent = "⤴ 分享", 2000);
+};
+{ const h = decodeURIComponent(location.hash.slice(1)), p = h && list.find(x => pid(x) === h); if (p) setTimeout(() => open(0, [p]), 900); } // 分享链接直达这张照片
+
+/* ===== 弹幕开关 ===== */
+function setDm(on) { dmOn = on; $("dm").style.display = on ? "" : "none"; $("dmt").classList.toggle("on", on); }
+$("dmt").onclick = () => setDm(!dmOn); setDm(dmOn);
+
+/* ===== 拍立得桌面模式：整齐的吸附网格，拖到哪格就排到哪格，其他照片自动让位 ===== */
+let ord = [], slots = [];
+const put = (d, s) => { d.style.translate = s.x + "px " + s.y + "px"; }; // 位置只用 translate，浏览器不需要重新排版，拖得快也不卡
+function layoutDesk(init) {
+  const w = $("wall"), W = w.clientWidth, iw = W < 600 ? 150 : 200, cols = Math.max(1, Math.floor(W / (iw + 28))), cw = W / cols, rh = iw + 66;
+  if (init || ord.length !== w.children.length) { ord = [...w.children]; init = true; }
+  slots = ord.map((_, k) => ({ x: (k % cols) * cw + (cw - iw) / 2, y: 30 + (k / cols | 0) * rh }));
+  ord.forEach((d, k) => {
+    if (init) { d.style.setProperty("--rot", (Math.random() * 8 - 4).toFixed(1) + "deg"); d.style.setProperty("--tape", (Math.random() * 10 - 5).toFixed(1) + "deg"); }
+    d.style.setProperty("--w", iw + "px"); put(d, slots[k]);
+  });
+  w.style.height = Math.ceil(ord.length / cols) * rh + 90 + "px";
+}
+function dragStart(d) { const w = $("wall"); d._w = d.offsetWidth; d._h = d.offsetHeight; d._W = w.clientWidth; d._H = w.offsetHeight; d.style.zIndex = ++z; d.classList.add("dragging"); document.body.classList.add("dg"); }
+function dragMove(d, x, y) { // x、y：照片左上角的目标位置
+  x = Math.min(Math.max(0, x), d._W - d._w); y = Math.min(Math.max(0, y), d._H - d._h); put(d, { x, y });
+  let t = 0, best = 1e12;
+  for (let k = 0; k < slots.length; k++) { const dd = (slots[k].x - x) ** 2 + (slots[k].y - y) ** 2; if (dd < best) { best = dd; t = k; } }
+  const cur = ord.indexOf(d);
+  if (t !== cur) { // 拖到别的格子：插入到那一格，其余照片顺序让位
+    ord.splice(cur, 1); ord.splice(t, 0, d);
+    ord.forEach((e, k) => { if (e !== d) put(e, slots[k]); });
+  }
+}
+const drag = (d, x, y) => { d._t = [x, y]; if (!d._raf) d._raf = requestAnimationFrame(() => { d._raf = 0; dragMove(d, d._t[0], d._t[1]); }); }; // 每帧只处理一次
+function dragEnd(d) { cancelAnimationFrame(d._raf); d._raf = 0; d.classList.remove("dragging"); document.body.classList.remove("dg"); put(d, slots[ord.indexOf(d)]); } // 松手：吸附进格子
+function dragify(d) {
+  d.onpointerdown = e => { // 电脑：按住鼠标拖动（移动超过 5 像素才算拖动，否则是点击）
+    if (!desk || e.pointerType === "touch") return;
+    d._m = false; const sx = e.clientX, sy = e.clientY, s0 = slots[ord.indexOf(d)]; let on = false;
+    d.setPointerCapture(e.pointerId);
+    const mv = ev => {
+      if (!on) { if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) <= 5) return; on = d._m = true; dragStart(d); }
+      drag(d, s0.x + ev.clientX - sx, s0.y + ev.clientY - sy);
+    };
+    const up = () => { d.removeEventListener("pointermove", mv); d.removeEventListener("pointerup", up); if (on) dragEnd(d); };
+    d.addEventListener("pointermove", mv); d.addEventListener("pointerup", up);
+  };
+  let s, lp; // 手机：长按约 0.25 秒后照片浮起，随后可拖动；不长按就是正常上下翻页
+  d.addEventListener("touchstart", e => {
+    if (!desk || e.target.closest(".lkb")) return;
+    d._m = false; d._drag = false; const t = e.touches[0]; s = { x: t.clientX, y: t.clientY, p: slots[ord.indexOf(d)] };
+    clearTimeout(lp); lp = setTimeout(() => { d._drag = true; dragStart(d); navigator.vibrate && navigator.vibrate(12); }, 250);
+  }, { passive: true });
+  d.addEventListener("touchmove", e => {
+    if (!s) return; const t = e.touches[0], dx = t.clientX - s.x, dy = t.clientY - s.y;
+    if (!d._drag) { if (Math.abs(dx) + Math.abs(dy) > 8) clearTimeout(lp); return; }
+    e.preventDefault(); d._m = true; drag(d, s.p.x + dx, s.p.y + dy);
+  }, { passive: false });
+  const end = () => { clearTimeout(lp); if (d._drag) dragEnd(d); d._drag = false; s = null; };
+  d.addEventListener("touchend", end); d.addEventListener("touchcancel", end);
+}
+let vWant = false; // 视图开关：瀑布流 ⇄ 桌面
+function syncV() { const b = $(vWant ? "vDesk" : "vWall"), t = $("vth"); t.style.setProperty("--tx", b.offsetLeft - 4 + "px"); t.style.setProperty("--tw", b.offsetWidth + "px"); }
+function setView(toDesk) { // 先淡出，再换成另一种摆法
+  if (toDesk === vWant) return;
+  vWant = toDesk; $("vWall").classList.toggle("on", !toDesk); $("vDesk").classList.toggle("on", toDesk); syncV();
+  const w = $("wall"); w.style.transition = "opacity .3s"; w.style.opacity = 0;
+  setTimeout(() => {
+    desk = toDesk; document.body.classList.toggle("deskmode", desk); wall(); w.style.opacity = 1;
+    if (desk) fireDm(matchMedia("(pointer:coarse)").matches ? "长按照片，就可以拖动啦；松手会自动吸附排好" : "按住照片拖动，松手会自动吸附排好～", 2);
+  }, 320);
+}
+$("vWall").onclick = () => setView(false); $("vDesk").onclick = () => setView(true);
+addEventListener("resize", syncV); syncV(); setTimeout(syncV, 400);
+let rt, lw = innerWidth, rafm; // 只有宽度变了才重新排（手机地址栏伸缩也会触发 resize）
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (innerWidth !== lw) { lw = innerWidth; if (desk && shown.length) layoutDesk(); } }, 200); });
+addEventListener("pointermove", e => { // 桌面模式的暖色聚光灯：只移动一个独立图层，不会拖慢页面
+  if (!desk || rafm || e.pointerType === "touch") return;
+  rafm = requestAnimationFrame(() => { rafm = 0; $("spot").style.transform = "translate3d(" + e.clientX + "px," + e.clientY + "px,0)"; });
+});
+
+/* ===== 拾光邮局 Light Post：信封墙（单独一页，圆形展开转场） ===== */
+const SEALS = ["♥", "✦", "✿", "☾", "☀", "❀"], SEALC = ["#c0392b", "#8e44ad", "#2e86ab", "#d35400", "#1e8449", "#b03a6b"];
+const hsh = x => [...x].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const dstr = ts => { const d = new Date(ts); return d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日"; };
+function envMarkup(e, m) { // 一个信封：信封体 / 信纸 / 封口翻盖 / 火漆章 / 邮票 / 邮戳 / 预览文字
+  const h = hsh(m.t + m.ts), d = new Date(m.ts);
+  e.style.setProperty("--r", ((h % 60) / 10 - 3).toFixed(1) + "deg"); e.style.setProperty("--sc", SEALC[h % 6]);
+  e.innerHTML = '<i class="ev-b"></i><i class="ev-p"><span class="pt"></span></i><i class="ev-f"></i><i class="ev-seal"></i><i class="ev-stamp"></i><i class="ev-pm"></i><span class="ev-to">To: 照片墙</span><span class="ev-tx"></span>';
+  e.querySelector(".ev-seal").textContent = SEALS[h % 6]; e.querySelector(".ev-stamp").textContent = "№" + (10 + h % 90);
+  e.querySelector(".ev-pm").textContent = (d.getMonth() + 1) + "·" + d.getDate(); e.querySelector(".ev-tx").textContent = m.t;
+}
+function renderBoard() {
+  const g = $("bgrid"), arr = msgs.slice().sort((a, b) => b.ts - a.ts); g.replaceChildren();
+  arr.forEach((m, i) => { const e = el("button", "env" + (m.fresh ? " fresh" : "") + (i > 9 ? " na" : "")); e.style.setProperty("--i", Math.min(i, 20)); envMarkup(e, m); e.onclick = () => readLetter(m, e); g.append(e); delete m.fresh; });
+  $("bempty").hidden = !!arr.length; $("bsub").textContent = "// " + arr.length + " 封来信 · " + arr.length + " letters · 新 → 旧";
+}
+let bTok = 0, bOpen = false, popIgnore = 0; // bTok：每次开/关加 1，过期的动画回调自动作废，连点也不会错乱
+const reduceMo = () => matchMedia("(prefers-reduced-motion:reduce)").matches;
+const anim = (e, kf, o) => { const a = e.animate(kf, Object.assign({ fill: "both" }, o)); return a.finished.catch(() => {}); };
+function curtainSet() { // 以按钮为圆心铺一块刚好盖住全屏的圆形幕布（固定大小，只缩放，不会重新排版）
+  const r = $("bdBtn").getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 4, c = $("curtain");
+  c.getAnimations().forEach(a => a.cancel());
+  Object.assign(c.style, { left: x - R + "px", top: y - R + "px", width: 2 * R + "px", height: 2 * R + "px", display: "block" }); return c;
+}
+async function openBoard() { // 幕布从按钮处铺满全屏（此时后面悄悄准备好页面）→ 幕布淡出，内容依次浮现
+  if (bOpen) return; bOpen = true; const tk = ++bTok, b = $("board"), c = curtainSet();
+  // 透明度用 .001 而不是 0：浏览器会跳过完全透明的元素，等到显示那一刻才第一次绘制，会卡一下；
+  // 入场动画在幕布后面就带着延迟开始排队，揭幕那一刻不再有集中的计算
+  b.classList.remove("rv"); b.style.opacity = .001; b.classList.add("on", "rv");
+  document.documentElement.classList.add("noscroll"); b.querySelector(".bscroll").scrollTop = 0; renderBoard();
+  if (location.hash === "#board") history.replaceState({ board: 0 }, "", "#board"); else history.pushState({ board: 1 }, "", "#board");
+  await anim(c, [{ transform: "scale(.02)" }, { transform: "scale(1)" }], { duration: reduceMo() ? 1 : 620, easing: "cubic-bezier(.65,0,.25,1)" });
+  if (tk !== bTok) return; b.style.opacity = "";
+  await anim(c, [{ opacity: 1 }, { opacity: 0 }], { duration: reduceMo() ? 1 : 460, easing: "ease-out" });
+  if (tk !== bTok) return; c.getAnimations().forEach(a => a.cancel()); c.style.display = "none";
+  if (API) { // 再向后台要一份完整的留言列表
+    const r = await api("/messages");
+    if (r && r.messages && r.messages.length !== msgs.length && bOpen) {
+      msgs = r.messages.map(x => ({ t: x.t, ts: x.ts || Date.now() })); msgs.forEach(m => { if (!seenDm.has(m.t)) { seenDm.add(m.t); visitorDm.push(m.t); } }); updCnt(); renderBoard();
+    }
+  }
+}
+async function doClose() { // 幕布盖住内容 → 页面悄悄复原 → 幕布缩回按钮
+  if (!bOpen) return; bOpen = false; const tk = ++bTok, b = $("board"), c = curtainSet(); closeLetter(true);
+  await anim(c, [{ transform: "scale(1)", opacity: 0 }, { transform: "scale(1)", opacity: 1 }], { duration: reduceMo() ? 1 : 240 });
+  if (tk !== bTok) return; b.classList.remove("on", "rv"); b.style.opacity = ""; document.documentElement.classList.remove("noscroll");
+  await anim(c, [{ transform: "scale(1)" }, { transform: "scale(.02)" }], { duration: reduceMo() ? 1 : 560, easing: "cubic-bezier(.65,0,.25,1)" });
+  if (tk !== bTok) return; c.getAnimations().forEach(a => a.cancel()); c.style.display = "none";
+}
+function closeBoard() { // 先立刻收回画面，再回退掉打开时加的那条历史记录
+  if (!bOpen) return;
+  const had = history.state && history.state.board; doClose();
+  if (had) { popIgnore++; history.back(); } else if (location.hash === "#board") history.replaceState(null, "", location.pathname + location.search);
+}
+addEventListener("popstate", () => { if (popIgnore > 0) { popIgnore--; return; } if (bOpen) doClose(); }); // 浏览器返回键 = 关闭
+
+function readLetter(m, from) { // 拆信：信封从原位置飞到中央 → 封口翻开 → 信纸升起
+  const L = $("ltr"), big = $("lbig"); envMarkup(big, m); big.className = "env big";
+  big.querySelector(".pt").replaceChildren(el("b", "", "亲爱的主人："), el("p", "", m.t), el("em", "", "—— 一位来访的朋友 · " + dstr(m.ts)));
+  L.classList.remove("out"); L.classList.add("on");
+  const a = from.getBoundingClientRect(), c = big.getBoundingClientRect();
+  big.animate([{ transform: "translate(" + (a.left + a.width / 2 - c.left - c.width / 2) + "px," + (a.top + a.height / 2 - c.top - c.height / 2) + "px) scale(" + a.width / c.width + ")" }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.9,.2,1)" });
+  clearTimeout(L._a); clearTimeout(L._b);
+  L._a = setTimeout(() => big.classList.add("flip"), 450); L._b = setTimeout(() => big.classList.add("open"), 900);
+}
+function closeLetter(now) {
+  const L = $("ltr"); if (!L.classList.contains("on")) return; clearTimeout(L._a); clearTimeout(L._b);
+  $("lbig").classList.remove("open"); setTimeout(() => $("lbig").classList.remove("flip"), 150);
+  if (now) return L.classList.remove("on", "out"); L.classList.add("out"); setTimeout(() => L.classList.remove("on", "out"), 380);
+}
+$("bdBtn").onclick = openBoard; $("bback").onclick = closeBoard; $("ltr").querySelector(".lbd").onclick = () => closeLetter();
+const sendLetter = () => { const i = $("bin"); if (submitMsg(i.value)) { i.value = ""; msgs[msgs.length - 1].fresh = 1; renderBoard(); $("board").querySelector(".bscroll").scrollTo({ top: 0, behavior: "smooth" }); } };
+$("bgo").onclick = sendLetter; $("bin").onkeydown = e => { if (e.key === "Enter") sendLetter(); };
+addEventListener("keydown", e => { if (e.key !== "Escape") return; if ($("ltr").classList.contains("on")) closeLetter(); else if ($("board").classList.contains("on")) closeBoard(); });
+if (location.hash === "#board") setTimeout(openBoard, 700);
+
+let scT; // 手机顶部按钮：滚动时更淡
+
+/* ===== 页面最底部：更多的故事即将到来~（滚到时浮现） ===== */
+new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { threshold: .5 }).observe($("more"));
+
+/* ===== 烟花彩蛋：连点标题 5 下，或输入 ↑↑↓↓←→←→BA（大合唱版） ===== */
+let fxP, tc = 0, tt1, ki = 0, showing = 0, entering = false;
+const loadFx = () => fxP || (fxP = new Promise((ok, no) => { if (window.FX) return ok(window.FX); const sc = document.createElement("script"); sc.src = "fx.js"; sc.onload = () => ok(window.FX); sc.onerror = no; document.head.appendChild(sc); })); // 用到才下载
+const fire = finale => { if (showing) return; showing = 1; loadFx().then(F => F.fireworks({ finale })).catch(() => {}).then(() => { showing = 0; }); };
+$("t").onclick = () => { clearTimeout(tt1); if (++tc >= 5) { tc = 0; fire(false); fireDm("🎆 烟花为你绽放～", 2); } tt1 = setTimeout(() => tc = 0, 1200); };
+const KON = "ArrowUp,ArrowUp,ArrowDown,ArrowDown,ArrowLeft,ArrowRight,ArrowLeft,ArrowRight,b,a".split(",");
+addEventListener("keydown", e => {
+  const k = e.key.length > 1 ? e.key : e.key.toLowerCase();
+  ki = k === KON[ki] ? ki + 1 : (k === KON[0] ? 1 : 0);
+  if (ki === KON.length) { ki = 0; fire(true); fireDm("🎉 你找到了隐藏彩蛋！", 2); }
+});
+console.log("%c悄悄告诉你：连点标题 5 下试试 🎆", "color:#c0714a;font-size:14px");
+
+/* ===== 命运之书入口：被魔法书吸进去 → 进入塔罗页（页面整体旋转着缩进书里） ===== */
+async function enterTarot() {
+  if (entering || bOpen) return; entering = true;
+  const go = () => { try { sessionStorage.setItem("pwTarot", "1"); } catch (e) {} location.href = TAROT_URL; };
+  if (reduceMo()) return go();
+  const gate = $("tarotGate"), bk = gate.querySelector(".bk"), g = bk.getBoundingClientRect(), vis = g.bottom > 40 && g.top < innerHeight - 40;
+  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, fx = loadFx().catch(() => null), clone = bk.cloneNode(true);
+  clone.style.cssText = "position:fixed;z-index:34;margin:0;left:" + (bx - g.width / 2) + "px;top:" + (by - g.height / 2) + "px;width:" + g.width + "px;height:" + g.height + "px";
+  document.body.append(clone); gate.style.visibility = "hidden"; document.body.classList.add("sucking");
+  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a0f4a,#050316 70%)"; document.body.append(dark);
+  dark.animate([{ opacity: 0 }, { opacity: .96 }], { duration: 1300, easing: "ease-in", fill: "forwards" });
+  const w = $("pgw"), sy = scrollY, inner = el("div"); // 只把“当前这一屏”做成图层来旋转：整页很长，整体做图层会占用大量显存、容易卡
+  document.documentElement.style.overflowY = "scroll"; // 保留滚动条的位置，避免页面宽度变化引起重新排版
+  inner.style.transform = "translateY(" + -sy + "px)"; while (w.firstChild) inner.append(w.firstChild); w.append(inner);
+  w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;z-index:20;will-change:transform,opacity;transform-origin:" + bx + "px " + by + "px";
+  w.animate([{ transform: "rotate(0deg) scale(1)", opacity: 1 }, { transform: "rotate(540deg) scale(.03)", opacity: .1 }], { duration: 1500, easing: "cubic-bezier(.55,0,.85,.35)", fill: "forwards" });
+  setTimeout(() => clone.classList.add("open"), 350); fx.then(F => F && F.vortex(bx, by, 1500));
+  await new Promise(r => setTimeout(r, 1250));
+  clone.animate([{ transform: "scale(1)" }, { transform: "scale(1.6)" }], { duration: 320, easing: "ease-out", fill: "forwards" });
+  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#c9b6ff 60%)"; document.body.append(fl);
+  fl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: "forwards" });
+  await new Promise(r => setTimeout(r, 340)); go();
+}
+$("bTarot").onclick = enterTarot; $("tarotGate").onclick = enterTarot;
+addEventListener("pageshow", e => { if (e.persisted) location.reload(); }); // 从塔罗页按返回键回来时，重置页面状态
+try { if (sessionStorage.getItem("pwBack") === "1") { // 从塔罗页返回：页面从书里旋转着“吐”回来
+  sessionStorage.removeItem("pwBack"); const w = $("pgw"), hs = document.documentElement.style;
+  if (!reduceMo()) { // 动画期间同样只合成一屏，结束后恢复
+    hs.overflowY = "scroll"; w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;transform-origin:50% 50%";
+    w.animate([{ transform: "rotate(-420deg) scale(.04)", opacity: 0 }, { transform: "none", opacity: 1 }], { duration: 1100, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }).finished.then(() => { w.style.cssText = ""; hs.overflowY = ""; }).catch(() => {});
+  }
+  document.documentElement.classList.remove("pwback");
+} } catch (e) {}
+
+bar(); wall(); danmaku();
+</script>
+</body>
+</html>
