@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050408">
+<title>命运之书 · 塔罗占卜</title>
+<link rel="stylesheet" href="tarot.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<header class="top">
+  <a class="back" id="back" href="index.html">‹ 照片墙</a>
+  <div class="mark">TAROT</div>
+  <div class="slots" id="slots" aria-hidden="true"><i></i><i></i><i></i></div>
+</header>
+<p class="qline" id="qline"></p>
+<p class="hint" id="hint">轻触魔法书</p>
+
+<section class="sheet" id="ask" aria-label="选择你的问题">
+  <p class="eyebrow">ASK THE CARDS</p>
+  <h2>你想问什么？</h2>
+  <ul id="qs"></ul>
+  <div class="row"><button type="button" class="ghost" id="shuffle">↻ 换一批</button><button type="button" class="go" id="go" disabled>带着这个问题抽牌</button></div>
+</section>
+
+<section class="sheet" id="read" aria-label="牌阵解读"></section>
+
+<div id="flash"></div>
+<div id="fade"></div>
+<div id="load"><span>星象校准中</span></div>
+<noscript><p class="nojs">需要开启 JavaScript 才能占卜。</p></noscript>
+
+<script>
+/* 从首页传送门进来时，先用白光盖住画面，避免闪烁 */
+try { if (sessionStorage.getItem('pwTarot') === '1') document.getElementById('flash').style.opacity = 1; } catch (e) {}
+/* 依次加载：three.js → GSAP → 牌面 → 书的贴图 → 题库 → 主程序。
+   每个库都先找本站 vendor/ 里的文件（国内最稳），找不到再用公共 CDN。 */
+(function () {
+  var LIBS = [
+    ['THREE', ['vendor/three.min.js', 'three.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js']],
+    ['gsap', ['vendor/gsap.min.js', 'gsap.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js', 'https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js']]
+  ];
+  var MINE = ['tarot-cards.js', 'tarot-book.js', 'questions.js', 'tarot.js'];
+  function add(src, ok, fail) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.body.appendChild(s); }
+  function lib(i) {
+    if (i >= LIBS.length) return mine(0);
+    var name = LIBS[i][0], list = LIBS[i][1], k = 0;
+    (function next() {
+      if (window[name]) return lib(i + 1);
+      if (k >= list.length) return die(name);
+      add(list[k++], function () { window[name] ? lib(i + 1) : next(); }, next);
+    })();
+  }
+  function mine(i) { if (i < MINE.length) add(MINE[i] + '?v=3', function () { mine(i + 1); }, function () { die(MINE[i]); }); }
+  function die(n) { document.querySelector('#load span').textContent = '加载失败：' + n + '（请检查 vendor 文件夹或网络）'; }
+  lib(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+塔罗页需要两个第三方库，放在本文件夹（vendor/）里，国内访问最稳；没放也会自动改用公共 CDN。
+
+1) three.min.js   —— three.js r128
+   下载：https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js   （浏览器打开 → 右键“另存为”）
+2) gsap.min.js    —— GSAP 3.12.5
+   下载：https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js     （同上）
+
+文件名必须就是 three.min.js 和 gsap.min.js。

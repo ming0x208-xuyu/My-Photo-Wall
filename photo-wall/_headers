@@ -31,8 +31,6 @@
   Cache-Control: public, max-age=0, must-revalidate
 /tarot.js
   Cache-Control: public, max-age=0, must-revalidate
-/tarot-3d.js
-  Cache-Control: public, max-age=0, must-revalidate
 /vendor/*
   Cache-Control: public, max-age=0, must-revalidate
 /tarot-cards.js
@@ -40,4 +38,10 @@
 /book.css
   Cache-Control: public, max-age=0, must-revalidate
 /fx.js
+  Cache-Control: public, max-age=0, must-revalidate
+/tarot-book.js
+  Cache-Control: public, max-age=0, must-revalidate
+/questions.js
+  Cache-Control: public, max-age=0, must-revalidate
+/tarot-portal.js
   Cache-Control: public, max-age=0, must-revalidate
