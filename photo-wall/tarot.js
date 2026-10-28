@@ -15,16 +15,18 @@
 
   /* ---------- 渲染器 / 状态 ---------- */
   const R = new THREE.WebGLRenderer({ canvas: $('#c'), antialias: true, powerPreference: 'high-performance' });
-  R.setPixelRatio(Math.min(devicePixelRatio, 1.75)); R.setClearColor(0x050408, 1);
+  const mobile = matchMedia('(pointer:coarse)').matches || innerWidth < 820;       // 手机：降低像素比和粒子数，保证流畅
+  R.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 1.75)); R.setClearColor(0x050408, 1);
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(40, 1, .1, 100);
   const S = {
     phase: again ? 'ask' : 'idle', offset: 0, vel: 0, dragging: false, dealT: 0, hero: 1, tableY: -1.2, disc: 0, candle: 1, zoom: arrive ? .45 : 1, tilt: false,
-    cam: { px: 0, py: 4.4, pz: 6, tx: 0, ty: -.5, tz: 0 }, bk: { cover: 0, shift: 0, glow: .35, beam: 0, burst: 0, scale: 1, sink: 0 },
-    dims: { w: 6, h: 10, a: .6, D: 12 }, picks: [], q: null, ptr: { x: 0, y: 0 }, src: new THREE.Vector3(0, -.4, .4)
+    cam: { px: 0, py: 4.4, pz: 6, tx: 0, ty: -.5, tz: 0 }, bk: { cover: 0, shift: 0, glow: .35, beam: 0, burst: 0, scale: 1, lift: 0 },
+    dims: { w: 6, h: 10, a: .6, D: 12 }, picks: [], q: null, slotA: 0, inspect: null, ptr: { x: 0, y: 0 }, src: new THREE.Vector3(0, -.4, .4)
   };
   const fz = a => (a < 1 ? 1 + (1 / a - 1) * .5 : 1);        // 竖屏时把镜头拉远，保证打开的书完整入镜
   const heroCam = a => ({ px: 0, py: 4.4 * fz(a), pz: 6 * fz(a), tx: 0, ty: -.5, tz: 0 });
-  const askCam = a => Object.assign(heroCam(a), { ty: -.5 - 1.25 * fz(a) });  // 视线压低 → 书在屏幕里上移，给底部面板让位
+  const side = () => innerHeight < 520 && innerWidth / innerHeight > 1.3;                  // 手机横屏：面板在右侧
+  const askCam = a => side() ? Object.assign(heroCam(a), { tx: 1.9, ty: -.5 }) : Object.assign(heroCam(a), { ty: -.5 - 1.5 * fz(a) });  // 竖屏：视线压低 → 书上移，给底部面板让位；横屏：书靠左
   const pickCam = () => ({ px: 0, py: .8, pz: S.dims.D, tx: 0, ty: 0, tz: 0 });
 
   /* ---------- 小贴图 ---------- */
@@ -93,7 +95,7 @@ void main(){
     const key = new THREE.DirectionalLight(0xffe9c4, .9); key.position.set(3, 6, 4); scene.add(key);
 
     // 金尘 + 远处虚化光斑
-    const dustPos = new Float32Array(420 * 3); for (let i = 0; i < 420; i++) dustPos.set([(Math.random() - .5) * 18, (Math.random() - .5) * 14, -10 * Math.random() + 1], i * 3);
+    const ND = mobile ? 240 : 420, dustPos = new Float32Array(ND * 3); for (let i = 0; i < ND; i++) dustPos.set([(Math.random() - .5) * 18, (Math.random() - .5) * 14, -10 * Math.random() + 1], i * 3);
     const dust = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(dustPos, 3)), new THREE.PointsMaterial({ map: dotT, size: .07, color: 0xffe2a0, transparent: true, opacity: .75, depthWrite: false, blending: AD })); scene.add(dust);
     const bokPos = new Float32Array(26 * 3); for (let i = 0; i < 26; i++) bokPos.set([(Math.random() - .5) * 22, (Math.random() - .5) * 12, -14 * Math.random() - 3], i * 3);
     const bok = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(bokPos, 3)), new THREE.PointsMaterial({ map: glowT, size: 1.2, color: 0xffbe6a, transparent: true, opacity: .2, depthWrite: false, blending: AD })); scene.add(bok);
@@ -165,7 +167,22 @@ void main(){
     const ids = [...Array(78).keys()]; for (let i = 77; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [ids[i], ids[j]] = [ids[j], ids[i]]; }
     const deck = ids.map((id, i) => { const m = new THREE.Mesh(cardGeo, cardMat()); m.visible = false; m.position.set(0, -99, 0); deckG.add(m); const d = { id, i, rev: Math.random() < .35, picked: false, m }; m.userData.d = d; return d; });
     const glint = new THREE.PointLight(0xffe2a8, 1, 16); glint.position.set(0, 1.5, 3.2); scene.add(glint);
+    const rrPts = (w, h, r, n) => { const p = []; [[w / 2 - r, h / 2 - r, 0], [-w / 2 + r, h / 2 - r, Math.PI / 2], [-w / 2 + r, -h / 2 + r, Math.PI], [w / 2 - r, -h / 2 + r, Math.PI * 1.5]].forEach(([cx, cy, a0]) => { for (let i = 0; i <= n; i++) { const a = a0 + i / n * Math.PI / 2; p.push(new THREE.Vector3(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 0)); } }); return p; };
+    const slotMesh = [0, 1, 2].map(() => { const l = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(rrPts(1, 1.7, .07, 6)), new THREE.LineBasicMaterial({ color: 0xe9c46f, transparent: true, opacity: 0, depthWrite: false })); l.visible = false; scene.add(l); return l; });
+    const focus = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowT, color: 0xffd998, transparent: true, opacity: 0, depthWrite: false, blending: AD })); focus.scale.set(2.6, 3.6, 1); focus.visible = false; scene.add(focus);
+    $('#labels').innerHTML = ['过去', '现在', '未来'].map((t, i) => `<span><b>${t}</b><i>${['PAST', 'PRESENT', 'FUTURE'][i]}</i></span>`).join('');
+    const labelEls = [...document.querySelectorAll('#labels span')], vv = new THREE.Vector3();
+    function hud(ph, bm, now, w, h) {
+      const sp = Math.min(.9, w * .26), sy = h * .2, showSlots = ph === 'pick' || (ph === 'deal' && S.slotA > 0), showLab = ph === 'pick' && S.slotA > .5;
+      slotMesh.forEach((l, k) => { l.visible = showSlots; if (showSlots) { l.position.set((k - 1) * sp, sy, .5); l.scale.setScalar(.55); l.material.opacity = S.slotA * (k < S.picks.length ? 0 : .75); } });
+      labelEls.forEach((el, k) => { if (showLab) { vv.set((k - 1) * sp, sy - .55 * .85 - .18, .5).project(cam); el.style.transform = `translate(${(vv.x * .5 + .5) * innerWidth}px,${(-vv.y * .5 + .5) * innerHeight}px) translate(-50%,0)`; } el.classList.toggle('on', showLab); });
+      if (bm && ph === 'pick' && S.picks.length < 3) { focus.visible = true; focus.position.set(bm.position.x, bm.position.y, bm.position.z - .06); focus.material.opacity = .5 + .15 * Math.sin(now * 2.2); } else focus.visible = false;
+    }
 
+    function revealLayout() {   // 三张牌翻开后的位置：竖屏在上方居中；手机横屏在左半边
+      const { w, h } = S.dims, sd = side(), aw = sd ? w * .5 : w * .92, ah = sd ? h * .78 : h * .44, sc = Math.min(1.9, ah / 1.7, aw / 3.24);
+      return { sc, sp: sc * 1.12, y: sd ? 0 : h * .2, cx: sd ? -w * .22 : 0 };
+    }
     /* ---------- 动画接口 ---------- */
     const b = S.bk, api = {};
     api.open = done => {
@@ -179,20 +196,22 @@ void main(){
     api.openNow = () => { Object.assign(b, { cover: 1, shift: 1, glow: 1, beam: 1 }); sheets[0].f = 1; sheets[1].f = 1; Object.assign(S.cam, askCam(S.dims.a)); };
     api.deal = done => {
       S.dealT = 0; const tl = gsap.timeline({ onComplete: done });
-      [2, 3, 4].forEach((k, i) => tl.to(sheets[k], { f: 1, duration: .7, ease: 'power2.in' }, i * .14));          // 书页哗啦翻过
-      tl.to(b, { burst: 1, duration: .5, ease: 'power2.out' }, 0).to(b, { burst: 0, duration: 1, ease: 'power2.in' }, .5)
-        .to(S.cam, Object.assign(pickCam(), { duration: 2.6, ease: 'power3.inOut' }), .9)
-        .to(S, { dealT: 3.4, duration: 3.4, ease: 'none' }, .9).to(S, { hero: 0, duration: 1.2, ease: 'power2.in' }, .2)
-        .to(b, { glow: 0, beam: 0, duration: 1.2 }, 1.3).to(b, { sink: 1, scale: 0, duration: 1.4, ease: 'power3.in' }, 1.3)
-        .to(S, { tableY: -9, disc: .38, candle: .3, duration: 1.8, ease: 'power2.inOut' }, 1.2);
+      [2, 3, 4].forEach((k, i) => tl.to(sheets[k], { f: 1, duration: .7, ease: 'power2.in' }, .1 + i * .14));           // 书页哗啦翻过
+      tl.to(b, { burst: 1, duration: .5, ease: 'power2.out' }, .1).to(b, { burst: 0, duration: 1.2, ease: 'power2.in' }, .6)
+        .to(S.cam, Object.assign(pickCam(), { duration: 2.4, ease: 'power3.inOut' }), 0)                                     // 镜头先转到正面
+        .to(b, { lift: 1, duration: 1.8, ease: 'power3.inOut' }, .1)                                                          // 书升起并转向观众
+        .to(S, { hero: 0, duration: 1.2, ease: 'power2.in' }, .1).to(S, { tableY: -9, disc: .38, candle: .3, duration: 2, ease: 'power2.inOut' }, .6)
+        .to(S, { dealT: 3.4, duration: 3.4, ease: 'none' }, 1.3)                                                              // 牌从书页中涌出（出牌源 = 书的实时位置）
+        .to(b, { glow: 0, beam: 0, duration: 1.1, ease: 'power2.in' }, 3.4).to(b, { scale: 0, duration: 1.1, ease: 'power3.in' }, 3.5)   // 最后一批牌离开后，书才淡去
+        .to(S, { slotA: 1, duration: .8 }, 3.6);
       return tl;
     };
     api.reveal = done => {
-      S.phase = 'reveal'; const { w, h } = S.dims, sc = Math.min(1.9, .46 * h / 1.7, w * .92 / 3.24), sp = sc * 1.12, y = h * .2;
+      S.phase = 'reveal'; const L = revealLayout(), { sc, sp, y, cx } = L;
       const tl = gsap.timeline({ onComplete: () => { S.tilt = true; } });
       S.picks.forEach((d, k) => {
         const m = d.m;
-        tl.to(m.position, { x: (k - 1) * sp, y, z: 1.2, duration: .9, ease: 'power3.inOut' }, k * .1)
+        tl.to(m.position, { x: cx + (k - 1) * sp, y, z: 1.2, duration: .9, ease: 'power3.inOut' }, k * .1)
           .to(m.scale, { x: sc, y: sc, z: sc, duration: .9, ease: 'power3.inOut' }, k * .1)
           .to(m.rotation, { y: Math.PI, duration: 1.2, ease: 'back.out(1.2)' }, 1 + k * .55)
           .to(m.scale, { x: sc * 1.1, y: sc * 1.1, duration: .3, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 1 + k * .55);
@@ -201,6 +220,7 @@ void main(){
       tl.call(() => done && done(), null, 2.3);
       return tl;
     };
+    api.revealLayout = revealLayout;
 
     /* ---------- 每帧 ---------- */
     const clock = new THREE.Clock();
@@ -208,7 +228,7 @@ void main(){
       requestAnimationFrame(frame);
       const dt = Math.min(clock.getDelta(), .05), now = clock.elapsedTime, ph = S.phase, { w, h } = S.dims;
       // 镜头
-      const c = S.cam, z = S.zoom;
+      let bm = null; const c = S.cam, z = S.zoom;
       cam.position.set(c.tx + (c.px - c.tx) * z + S.ptr.x * .2, c.ty + (c.py - c.ty) * z + S.ptr.y * .12, c.tz + (c.pz - c.tz) * z); cam.lookAt(c.tx, c.ty, c.tz);
       // 背景
       dust.rotation.y += dt * .012; dust.position.y = Math.sin(now * .3) * .15; bok.position.x = Math.sin(now * .1) * .5;
@@ -222,8 +242,8 @@ void main(){
         r.cs.forEach(cc => { const u = (now * r.spd * .7 * dir + cc.ph) * TAU; cc.m.position.set(Math.cos(u) * r.a, Math.sin(now * 1.2 + cc.ph * 9) * .12, Math.sin(u) * r.b); cc.m.lookAt(0, 4, 8); cc.m.rotateZ(Math.sin(now * .6 + cc.ph * 5) * .4); cc.m.material.uniforms.uSheen.value = .3 + Math.sin(now * .5 + cc.ph * 6) * .6; });
       });
       // 书
-      root.position.set(0, -.55 + Math.sin(now * 1.1) * .05 * (1 - b.sink) - b.sink * .8, 0); root.scale.setScalar(Math.max(.0001, b.scale)); root.visible = b.scale > .002;
-      tilt.rotation.set(-1.15 + Math.sin(now * .7) * .02, lerp(-.4, 0, b.shift) + Math.sin(now * .5) * .05, 0);
+      root.position.set(side() ? -w * .18 * b.lift : 0, -.55 + (h * .17 + .55) * b.lift + Math.sin(now * 1.1) * .05, 0); root.scale.setScalar(Math.max(.0001, b.scale * (1 - .12 * b.lift))); root.visible = b.scale > .002;
+      tilt.rotation.set(lerp(-1.15, -.28, b.lift) + Math.sin(now * .7) * .02, lerp(-.4, 0, b.shift) + Math.sin(now * .5) * .05, 0);
       bk.position.x = -.75 * (1 - b.shift); hinge.rotation.y = -b.cover * Math.PI; hinge.position.z = .17 - .34 * b.cover;
       sheets.forEach(s => { let f = s.f; if (s.k === 2 && ph === 'ask') f += .025 + .025 * Math.sin(now * 1.7); if (f !== s.last) { bend(s, f); s.last = f; } });
       halo.material.opacity = .12 + .5 * b.glow + .6 * b.burst; halo.scale.setScalar(5 + 3 * b.glow + 4 * b.burst);
@@ -238,7 +258,7 @@ void main(){
       } else if (ph === 'deal' || ph === 'pick') {
         const Rf = clamp(w * 1.15, 6.5, 12), step = .62 / Rf, span = 78 * step; S.fan = { Rf, step, span };
         if (ph === 'pick' && !S.dragging) { S.offset += S.vel; S.vel *= .93; if (Math.abs(S.vel) < .0006) S.offset += (Math.round(S.offset / step) * step - S.offset) * .1; }   // 惯性滑动，停下后吸附到最近一张
-        const pivotY = -h * .2 - Rf, sx = S.src;
+        let best = 9; S.src.set(root.position.x, root.position.y + .1, root.position.z + .5); const pivotY = -h * .2 - Rf, sx = S.src;
         for (const d of deck) {
           if (d.picked) { d.m.material.uniforms.uSheen.value = .5 + Math.sin(now * .8 + d.i) * .5; continue; }
           const m = d.m; let a = ((d.i * step + S.offset) % span + span) % span; if (a > span / 2) a -= span;
@@ -248,11 +268,11 @@ void main(){
           const fo = Math.exp(-Math.pow(a / (step * 1.7), 2)), tx = Math.sin(a) * Rf, ty = pivotY + Math.cos(a) * Rf + fo * .5 + Math.sin(now * 1.2 + d.i) * .025, tz = -dist * .05 + fo * .3;
           m.visible = true; m.position.set(lerp(sx.x, tx, p), lerp(sx.y, ty, p) + (ph === 'deal' ? Math.sin(Math.PI * p) * .9 : 0), lerp(sx.z, tz, p));
           m.rotation.set(0, 0, -a + (1 - p) * (d.i % 2 ? 3 : -3)); m.scale.setScalar((.25 + .75 * p) * (1 + fo * .16));
-          m.material.uniforms.uSheen.value = .25 + a * 1.4 + Math.sin(now * .5) * .25; m.material.uniforms.uDim.value = lerp(.62, 1, clamp(1 - dist / (w * .6)));
+          m.material.uniforms.uSheen.value = .25 + a * 1.4 + Math.sin(now * .5) * .25; m.material.uniforms.uDim.value = lerp(.62, 1, clamp(1 - dist / (w * .6))); if (p >= 1 && Math.abs(a) < best) { best = Math.abs(a); bm = m; }
         }
         glint.position.set(S.ptr.x * 3.5, 1.5 + S.ptr.y * 1.5, 3.2);
       }
-      R.render(scene, cam);
+      hud(ph, bm, now, w, h); R.render(scene, cam);
     }
 
     /* ---------- 尺寸 ---------- */
@@ -260,60 +280,90 @@ void main(){
       const W = innerWidth, H = innerHeight, a = W / H; R.setSize(W, H, false); cam.aspect = a; cam.updateProjectionMatrix();
       const h0 = 2 * Math.tan(THREE.MathUtils.degToRad(20)), D = Math.max(11, 5.6 / a / h0); S.dims = { a, D, h: h0 * D, w: h0 * D * a };
       if (S.phase === 'idle') Object.assign(S.cam, heroCam(a)); if (S.phase === 'ask') Object.assign(S.cam, askCam(a)); if (S.phase === 'pick') S.cam.pz = D;
+      if (S.phase === 'reveal' && S.tilt && !S.inspect) { const L = revealLayout(); S.picks.forEach((d, k) => { d.m.position.set(L.cx + (k - 1) * L.sp, L.y, 1.2); d.m.scale.setScalar(L.sc); }); }
     }
-    addEventListener('resize', layout); layout();
+    addEventListener('resize', layout); addEventListener('orientationchange', () => setTimeout(layout, 250)); if (window.visualViewport) visualViewport.addEventListener('resize', layout); layout();
     return { api, deck, frame, layout, cardGeo };
   }
 
   /* ---------- 界面 ---------- */
   init().then(ctx => {
-    const { api, deck, frame } = ctx, hint = $('#hint'), ask = $('#ask'), read = $('#read'), slots = [...document.querySelectorAll('#slots i')], qline = $('#qline'), go = $('#go');
-    const LABEL = ['过去', '现在', '未来'], esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const { api, deck, frame } = ctx, hint = $('#hint'), ask = $('#ask'), read = $('#read'), qline = $('#qline'), tip = $('#tip'), go = $('#go');
+    const LABEL = ['过去', '现在', '未来'], ROM = ['I', 'II', 'III', 'IV', 'V', 'VI'], esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     const setPhase = p => { S.phase = p; };
-    let six = [];
-    const shuffleSix = () => {   // 每次随机 6 个（尽量不和上一批重复）
+    const lastRender = { n: 0 };
+    let six = [], insp = null;
+
+    /* —— 选问题：每次随机 6 个（尽量不和上一批重复），不显示分类 —— */
+    const shuffleSix = () => {
       const pool = QS.filter(q => !six.includes(q)), src = pool.length >= 6 ? pool : QS.slice();
       for (let i = src.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [src[i], src[j]] = [src[j], src[i]]; }
       six = src.slice(0, 6); S.q = null; go.disabled = true; renderQs();
     };
     function renderQs() {
-      $('#qs').innerHTML = six.map((q, i) => `<li><button type="button" class="q${q === S.q ? ' on' : ''}" data-i="${i}">${esc(q)}</button></li>`).join('');
-      gsap.to('#qs .q', { opacity: 1, y: 0, duration: .5, stagger: .07, ease: 'power2.out', overwrite: true });
+      const ul = $('#qs');
+      ul.innerHTML = six.map((q, i) => `<li><button type="button" class="q${q === S.q ? ' on' : ''}" data-i="${i}"><span class="no">${ROM[i]}</span><span class="tx">${esc(q)}</span><span class="mk"></span></button></li>`).join('');
+      ul.scrollTop = 0; gsap.to('#qs .q', { opacity: 1, y: 0, duration: .5, stagger: .06, ease: 'power2.out', overwrite: true });
     }
-    $('#qs').addEventListener('click', e => { const b = e.target.closest('.q'); if (!b) return; S.q = six[+b.dataset.i]; go.disabled = false; document.querySelectorAll('#qs .q').forEach(x => x.classList.toggle('on', x === b)); });
+    $('#qs').addEventListener('click', e => {
+      const b = e.target.closest('.q'); if (!b) return; S.q = six[+b.dataset.i]; go.disabled = false;
+      document.querySelectorAll('#qs .q').forEach(x => x.classList.toggle('on', x === b));
+      gsap.fromTo(b.querySelector('.mk'), { scale: .4 }, { scale: 1, duration: .35, ease: 'back.out(3)' });
+    });
     $('#shuffle').onclick = shuffleSix;
     const showAsk = () => { setPhase('ask'); hint.classList.add('off'); if (!six.length) shuffleSix(); else renderQs(); ask.classList.add('show'); };
-    const setSlots = n => slots.forEach((s, i) => s.classList.toggle('fill', i < n));
 
     function start() { if (S.phase !== 'idle') return; setPhase('open'); hint.classList.add('off'); api.open(showAsk); }
     go.onclick = () => {
       if (!S.q || S.phase !== 'ask') return;
-      ask.classList.remove('show'); qline.textContent = S.q; qline.classList.add('on'); $('#slots').classList.add('on'); setPhase('deal');
-      api.deal(() => { setPhase('pick'); hint.textContent = '左右滑动牌阵，轻触一张牌'; hint.classList.remove('off'); });
+      ask.classList.remove('show'); qline.textContent = S.q; qline.classList.add('on'); setPhase('deal');
+      api.deal(() => { setPhase('pick'); hint.textContent = '左右滑动牌阵 · 轻触一张牌'; hint.classList.remove('off'); });
     };
-    $('#back').addEventListener('click', e => { e.preventDefault(); put('pwBack', '1'); $('#fade').classList.add('on'); setTimeout(() => { location.href = 'index.html'; }, 600); });
+    const leave = e => { e.preventDefault(); put('pwBack', '1'); $('#fade').classList.add('on'); setTimeout(() => { location.href = 'index.html'; }, 600); };
+    $('#back').addEventListener('click', leave);
 
+    /* —— 翻牌后的解读：手机上是“过去/现在/未来”三个标签页，电脑上三列并排 —— */
+    const pulse = k => { const m = S.picks[k] && S.picks[k].m; if (!m || insp) return; const sc = api.revealLayout().sc; gsap.fromTo(m.scale, { x: sc, y: sc, z: sc }, { x: sc * 1.12, y: sc * 1.12, z: sc * 1.12, duration: .25, yoyo: true, repeat: 1, ease: 'sine.inOut' }); };
     function showRead() {
       const cs = S.picks.map(d => T.cards[d.id]), kw = cs.map(c => c.kw[0]);
-      read.innerHTML = `<p class="eyebrow">YOUR SPREAD</p><div class="sum"><small>PAST · PRESENT · FUTURE</small>从「${kw[0]}」出发，经过「${kw[1]}」，走向「${kw[2]}」</div><div class="cols">` +
-        S.picks.map((d, k) => { const c = cs[k], r = T.read(c, d.rev); return `<article class="rc"><span class="pos">${LABEL[k]} · ${['PAST', 'PRESENT', 'FUTURE'][k]}</span><b>${esc(c.zh)}</b><i>${esc(c.en.toUpperCase())} · ${d.rev ? '逆位' : '正位'}</i><div class="kw">${c.kw.map(x => `<em>${esc(x)}</em>`).join('')}</div><p>${esc(r.text)}</p></article>`; }).join('') +
-        `</div><div class="row"><button type="button" class="go" id="again">换个问题再抽</button><a class="ghost" href="index.html" id="home">回到照片墙</a></div><small class="foot">占卜仅供娱乐，别太当真。</small>`;
+      read.innerHTML = `<div class="grab"></div><div class="rbody"><div class="sum"><small>PAST · PRESENT · FUTURE</small>从「${esc(kw[0])}」出发，经过「${esc(kw[1])}」，走向「${esc(kw[2])}」</div>` +
+        `<div class="tabs">${LABEL.map((t, i) => `<button type="button" data-t="${i}" class="${i ? '' : 'cur'}">${t}</button>`).join('')}</div><div class="cols">` +
+        S.picks.map((d, k) => { const c = cs[k], r = T.read(c, d.rev); return `<article class="rc${k ? '' : ' cur'}" data-k="${k}"><span class="pos">${LABEL[k]} · ${['PAST', 'PRESENT', 'FUTURE'][k]}</span><b>${esc(c.zh)}</b><i>${esc(c.en.toUpperCase())} · ${d.rev ? '逆位' : '正位'}</i><div class="kw">${c.kw.map(x => `<em>${esc(x)}</em>`).join('')}</div><p>${esc(r.text)}</p></article>`; }).join('') +
+        `</div><small class="foot">占卜仅供娱乐，别太当真。</small></div><footer class="bar"><button type="button" class="go" id="again">换个问题再抽</button><a class="ghost" href="index.html" id="home">回到照片墙</a></footer>`;
       read.classList.add('show'); gsap.to('.rc', { opacity: 1, y: 0, duration: .7, stagger: .18, ease: 'power2.out', delay: .4 });
-      $('#again').onclick = () => { put('ttAgain', '1'); location.reload(); };
-      $('#home').addEventListener('click', e => { e.preventDefault(); put('pwBack', '1'); $('#fade').classList.add('on'); setTimeout(() => { location.href = 'index.html'; }, 600); });
+      read.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const k = +b.dataset.t; read.querySelectorAll('.tabs button').forEach((x, i) => x.classList.toggle('cur', i === k)); read.querySelectorAll('.rc').forEach((x, i) => x.classList.toggle('cur', i === k)); pulse(k); });
+      $('#again').onclick = () => { put('ttAgain', '1'); location.reload(); }; $('#home').addEventListener('click', leave);
+      tip.textContent = '轻触牌面可放大查看'; tip.classList.add('on'); setTimeout(() => { if (!insp) tip.classList.remove('on'); }, 4800);
     }
+
+    /* —— 放大查看：轻触翻开的牌，牌飞到屏幕中央放大（看清牌面文字），再轻触任意处返回 —— */
+    function inspectOn(d) {
+      insp = d; S.inspect = d; S.tilt = false; read.classList.add('away'); tip.textContent = '轻触任意处返回'; tip.classList.add('on');
+      const { w, h } = S.dims, sd = side(), sc = Math.min((sd ? w * .5 : w * .9), (sd ? h * .82 : h * .72) / 1.7), cx = sd ? -w * .22 : 0;
+      S.picks.forEach(p => {
+        if (p === d) { gsap.to(p.m.position, { x: cx, y: 0, z: 2.6, duration: .6, ease: 'power3.out' }); gsap.to(p.m.scale, { x: sc, y: sc, z: sc, duration: .6, ease: 'power3.out' }); gsap.to(p.m.rotation, { x: 0, y: Math.PI, duration: .6, ease: 'power3.out' }); gsap.to(p.m.material.uniforms.uDim, { value: 1, duration: .3 }); }
+        else gsap.to(p.m.material.uniforms.uDim, { value: .12, duration: .4 });
+      });
+    }
+    function inspectOff() {
+      if (!insp) return; const L = api.revealLayout(); insp = null; read.classList.remove('away'); tip.classList.remove('on');
+      S.picks.forEach((p, k) => { gsap.to(p.m.position, { x: L.cx + (k - 1) * L.sp, y: L.y, z: 1.2, duration: .6, ease: 'power3.inOut' }); gsap.to(p.m.scale, { x: L.sc, y: L.sc, z: L.sc, duration: .6, ease: 'power3.inOut' }); gsap.to(p.m.material.uniforms.uDim, { value: 1, duration: .4 }); });
+      setTimeout(() => { S.tilt = true; S.inspect = null; }, 650);
+    }
+
     function pick(d) {
       if (S.phase !== 'pick' || d.picked || S.picks.length >= 3) return;
       d.picked = true; S.picks.push(d); const k = S.picks.length - 1, m = d.m, { w, h } = S.dims, sp = Math.min(.9, w * .26);
-      m.material.uniforms.uRev.value = d.rev ? 1 : 0;
-      T.canvas(T.cards[d.id], 512).then(cv => { const t = new THREE.CanvasTexture(cv); t.anisotropy = Math.min(8, R.capabilities.getMaxAnisotropy()); m.material.uniforms.uFront.value = t; });   // 只给选中的牌生成牌面贴图
+      m.material.uniforms.uRev.value = d.rev ? 1 : 0; gsap.to(m.material.uniforms.uDim, { value: 1, duration: .4 });
+      T.canvas(T.cards[d.id], 768).then(cv => { const t = new THREE.CanvasTexture(cv); t.anisotropy = Math.min(8, R.capabilities.getMaxAnisotropy()); m.material.uniforms.uFront.value = t; });   // 只给选中的 3 张牌生成高清牌面
       gsap.to(m.position, { x: (k - 1) * sp, y: h * .2, z: .6, duration: .9, ease: 'power3.out' }); gsap.to(m.scale, { x: .55, y: .55, z: .55, duration: .9, ease: 'power3.out' }); gsap.to(m.rotation, { z: 0, duration: .9, ease: 'power3.out' });
-      setSlots(S.picks.length); hint.textContent = S.picks.length < 3 ? `已选 ${S.picks.length} / 3` : '';
+      hint.textContent = S.picks.length < 3 ? `已选 ${S.picks.length} / 3　·　再选 ${3 - S.picks.length} 张` : '';
       if (S.picks.length === 3) { hint.classList.add('off'); setTimeout(() => { api.reveal(showRead); }, 1000); }
     }
 
-    /* ---------- 指针：拖动牌阵 / 点选 ---------- */
+    /* —— 指针：拖动牌阵 / 点选 / 放大 —— */
     const cvEl = $('#c'), rc = new THREE.Raycaster(), v2 = new THREE.Vector2(); let dn = null;
+    const hitOf = (e, list) => { v2.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1)); rc.setFromCamera(v2, cam); return rc.intersectObjects(list, false)[0]; };
     cvEl.addEventListener('pointerdown', e => { dn = { t: performance.now(), lx: e.clientX, m: 0 }; if (S.phase === 'pick') { S.dragging = true; S.vel = 0; } try { cvEl.setPointerCapture(e.pointerId); } catch (x) { } });
     addEventListener('pointermove', e => {
       S.ptr.x = e.clientX / innerWidth * 2 - 1; S.ptr.y = -(e.clientY / innerHeight * 2 - 1);
@@ -322,16 +372,17 @@ void main(){
     });
     addEventListener('pointerup', e => {
       const d = dn; dn = null; S.dragging = false; if (!d) return;
-      if (d.m < 8 && performance.now() - d.t < 500) {
-        if (S.phase === 'idle') return start();
-        if (S.phase !== 'pick') return;
-        v2.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1)); rc.setFromCamera(v2, cam);
-        const hit = rc.intersectObjects(deck.filter(x => x.m.visible && !x.picked).map(x => x.m), false)[0]; if (hit) pick(hit.object.userData.d);
-      }
+      if (d.m >= 8 || performance.now() - d.t >= 500) return;
+      if (S.phase === 'idle') return start();
+      if (S.phase === 'reveal') { if (insp) return inspectOff(); if (!S.tilt) return; const h = hitOf(e, S.picks.map(x => x.m)); if (h) inspectOn(h.object.userData.d); return; }
+      if (S.phase !== 'pick') return;
+      const hit = hitOf(e, deck.filter(x => x.m.visible && !x.picked).map(x => x.m)); if (hit) pick(hit.object.userData.d);
     });
-    addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') start(); if (S.phase === 'pick') { if (e.key === 'ArrowLeft') S.vel = -.02; if (e.key === 'ArrowRight') S.vel = .02; } });
+    addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') start(); if (e.key === 'Escape') inspectOff(); if (S.phase === 'pick') { if (e.key === 'ArrowLeft') S.vel = -.02; if (e.key === 'ArrowRight') S.vel = .02; } });
+    // 手机浏览器把页面切到后台再回来时，重新校准一次尺寸
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) ctx.layout(); });
 
-    /* ---------- 开场 ---------- */
+    /* —— 开场 —— */
     if (S.phase === 'ask') { api.openNow(); showAsk(); } else { hint.classList.remove('off'); }
     frame();
     requestAnimationFrame(() => {

@@ -4,25 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050408">
+<meta name="format-detection" content="telephone=no">
 <title>命运之书 · 塔罗占卜</title>
-<link rel="stylesheet" href="tarot.css">
+<link rel="stylesheet" href="tarot.css?v=4">
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="labels" aria-hidden="true"></div>
 
 <header class="top">
-  <a class="back" id="back" href="index.html">‹ 照片墙</a>
+  <a class="back" id="back" href="index.html" aria-label="回到照片墙">‹ 照片墙</a>
   <div class="mark">TAROT</div>
-  <div class="slots" id="slots" aria-hidden="true"><i></i><i></i><i></i></div>
+  <span></span>
 </header>
 <p class="qline" id="qline"></p>
+<p class="tip" id="tip"></p>
 <p class="hint" id="hint">轻触魔法书</p>
 
 <section class="sheet" id="ask" aria-label="选择你的问题">
-  <p class="eyebrow">ASK THE CARDS</p>
-  <h2>你想问什么？</h2>
-  <ul id="qs"></ul>
-  <div class="row"><button type="button" class="ghost" id="shuffle">↻ 换一批</button><button type="button" class="go" id="go" disabled>带着这个问题抽牌</button></div>
+  <div class="grab"></div>
+  <div class="head">
+    <p class="eyebrow">ASK THE CARDS</p>
+    <h2>你想问什么？</h2>
+    <p class="sub">静下心来，选一个此刻最想问的问题</p>
+  </div>
+  <ol id="qs"></ol>
+  <footer class="bar"><button type="button" class="ghost" id="shuffle">↻ 换一批</button><button type="button" class="go" id="go" disabled>带着这个问题抽牌</button></footer>
 </section>
 
 <section class="sheet" id="read" aria-label="牌阵解读"></section>
@@ -53,7 +60,7 @@ try { if (sessionStorage.getItem('pwTarot') === '1') document.getElementById('fl
       add(list[k++], function () { window[name] ? lib(i + 1) : next(); }, next);
     })();
   }
-  function mine(i) { if (i < MINE.length) add(MINE[i] + '?v=3', function () { mine(i + 1); }, function () { die(MINE[i]); }); }
+  function mine(i) { if (i < MINE.length) add(MINE[i] + '?v=4', function () { mine(i + 1); }, function () { die(MINE[i]); }); }
   function die(n) { document.querySelector('#load span').textContent = '加载失败：' + n + '（请检查 vendor 文件夹或网络）'; }
   lib(0);
 })();

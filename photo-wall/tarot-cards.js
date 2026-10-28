@@ -249,7 +249,7 @@
     const s = c.suit, e = EMB[s], n = c.n; let g = `<g class="t" opacity=".55">${MIN_BACK[s]()}</g>`;
     const T = (inner) => `<g clip-path="url(#rg)"><g transform="translate(0 -14)">${g}</g></g><g transform="translate(0 -14)">${inner}</g>`;       // 把 (100,156) 挪到圆窗圆心
     if (n === 1) return T(circ(100, 156, 50, 'class="t" stroke-dasharray="1 4"') + e(100, 156, 1.35) + path("M52 218q48-24 96 0M60 226q40-16 80 0", 'class="t"') + spark(100, 100, 4) + dots([[56, 112], [146, 118], [60, 214], [144, 210]], 1.6));
-    if (n <= 10) { const P = POS2[n]; return T(`<g class="t">${poly(100, 156, 56, n)}${n <= 5 ? pts(P, n > 3) : ""}</g>` + P.map(p => e(p[0], p[1] - 0, SC2[n])).join("")); }
+    if (n <= 10) { const P = POS2[n]; return T(`<g class="t">${poly(100, 156, 56, n)}${n <= 5 ? pts(P, n > 3) : ""}</g>` + P.map(p => e(100 + (p[0] - 100) * .9, 156 + (p[1] - 156) * (n >= 8 ? .8 : 1), SC2[n])).join("")); }
     const k = n - 11, cy = 168;
     const rank = [
       () => spark(100, 92, 9) + path("M72 104q14-16 28 0q14-16 28 0") + circ(100, cy, 52, 'class="t" stroke-dasharray="2 4"'),
@@ -266,9 +266,9 @@
     const art = c.major ? `<g transform="translate(100 ${CY}) scale(1.14)">${E[c.n]()}</g>` : minorArt(c);
     const dust = Array.from({ length: 26 }, () => circ(f(10 + rnd() * 180), f(16 + rnd() * 308), f(.3 + rnd() * .7), 'class="f" opacity=".45"')).join("");
     const tx = o.text === false ? "" :
-      `<text x="100" y="${c.zh.length > 4 ? 280 : 281}" text-anchor="middle" font-size="${c.zh.length > 4 ? 14 : 16}" letter-spacing="3" fill="#f4ead2" font-family="TitleZH,'ZCOOL XiaoWei','Noto Serif SC',serif">${c.zh}</text>` +
-      `<text x="100" y="300" text-anchor="middle" font-size="6.4" letter-spacing="2.2" fill="#e6c06e" font-family="TitleEN,Italiana,serif">${c.en.toUpperCase()}</text>` +
-      `<text x="100" y="236" text-anchor="middle" font-size="9" letter-spacing="4" fill="#e6c06e" font-family="TitleEN,Italiana,serif">${cap(c)}</text>`;
+      `<text x="100" y="283" text-anchor="middle" font-size="${c.zh.length > 4 ? 15 : 19}" letter-spacing="2" fill="#fbf3dc" font-family="TitleZH,'ZCOOL XiaoWei','Noto Serif SC',serif">${c.zh}</text>` +
+      `<text x="100" y="302" text-anchor="middle" font-size="7.6" letter-spacing="1.6" fill="#f3dc9c" font-family="TitleEN,Italiana,serif">${c.en.toUpperCase()}</text>` +
+      `<text x="100" y="237" text-anchor="middle" font-size="11" letter-spacing="3" fill="#f3dc9c" font-family="TitleEN,Italiana,serif">${cap(c)}</text>`;
     return `<svg viewBox="0 0 200 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${c.zh} ${c.en}"><defs>` +
       `<linearGradient id="gg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="340"><stop offset="0" stop-color="#fff2c4"/><stop offset=".5" stop-color="#e6c06e"/><stop offset="1" stop-color="#a8772e"/></linearGradient>` +
       `<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e0c13"/><stop offset="1" stop-color="#050407"/></linearGradient>` +
@@ -310,12 +310,11 @@
     // 牌面贴图：图形用 SVG 画，文字用 Canvas 画（这样能用上网站已加载的标题字体）
     async canvas(c, w = 512) {
       try { await Promise.all([document.fonts.load("16px TitleZH"), document.fonts.load("10px TitleEN")]); } catch (e) { /* 字体没加载就用后备字体 */ }
-      const cv = await raster(svg(c, { text: false }), w), x = cv.getContext("2d"), k = w / 200;
-      x.textAlign = "center"; x.fillStyle = "#f4ead2"; x.font = `${(c.zh.length > 4 ? 14 : 16) * k}px TitleZH,"ZCOOL XiaoWei","Noto Serif SC",serif`;
-      if ("letterSpacing" in x) x.letterSpacing = 3 * k + "px";
-      x.fillText(c.zh, 100 * k, (c.zh.length > 4 ? 280 : 281) * k + 5 * k);
-      x.fillStyle = "#e6c06e"; x.font = `${6.4 * k}px TitleEN,Italiana,serif`; if ("letterSpacing" in x) x.letterSpacing = 2.2 * k + "px"; x.fillText(c.en.toUpperCase(), 100 * k, 300 * k + 2 * k);
-      x.font = `${9 * k}px TitleEN,Italiana,serif`; if ("letterSpacing" in x) x.letterSpacing = 4 * k + "px"; x.fillText(cap(c), 100 * k, 236 * k + 3 * k);
+      const cv = await raster(svg(c, { text: false }), w), x = cv.getContext("2d"), k = w / 200, ls = (v) => { if ("letterSpacing" in x) x.letterSpacing = v * k + "px"; };
+      x.textAlign = "center"; x.shadowColor = "rgba(0,0,0,.8)"; x.shadowBlur = 3 * k;       // 文字加一点点黑色描影，在金线底上更清晰
+      x.fillStyle = "#fbf3dc"; x.font = `${(c.zh.length > 4 ? 15 : 19) * k}px TitleZH,"ZCOOL XiaoWei","Noto Serif SC","Songti SC",serif`; ls(2); x.fillText(c.zh, 100 * k, 283 * k);
+      x.fillStyle = "#f3dc9c"; x.font = `${7.6 * k}px TitleEN,Italiana,Georgia,serif`; ls(1.6); x.fillText(c.en.toUpperCase(), 100 * k, 302 * k);
+      x.font = `${11 * k}px TitleEN,Italiana,Georgia,serif`; ls(3); x.fillText(cap(c), 100 * k, 237 * k);
       return cv;
     },
     backCanvas: (w = 512) => raster(BACK, w)
