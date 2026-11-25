@@ -74,7 +74,7 @@
     cx.drawImage(b, 0, 0, cw, ch); b.close && b.close();
     let blob = await new Promise(r => cv.toBlob(r, type, o.q)), t = type; if (!blob) throw new Error("编码失败");
     if (blob.type && blob.type !== type) t = blob.type; // 浏览器自动换了格式
-    const useOriginal = t === it.file.type && cw === w && ch === h && blob.size >= it.file.size;
+    const useOriginal = blob.size >= it.file.size; // 压缩后反而更大：直接保留原图，下载的也是原图
     it.res = { blob, type: t, w: cw, h: ch, useOriginal };
   }
   function schedule() { clearTimeout(timer); timer = setTimeout(runAll, 220); imgs.forEach(i => { if (i.state !== "err") { i.state = "wait"; paint(i); } }); }
