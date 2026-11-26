@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>我的照片墙</title>
 <meta name="description" content="把值得记住的瞬间，挂在墙上">
-<link rel="icon" href="data:,">
 <meta property="og:type" content="website">
 <meta property="og:title" content="我的照片墙">
 <meta property="og:description" content="把值得记住的瞬间，挂在墙上。来看看，也可以点个赞、留一条弹幕。">
@@ -25,7 +24,7 @@
 <div id="pgw">
 <header><h1 id="t"></h1><p id="te"></p><p id="s"></p></header>
 <div class="bar" id="bar"></div>
-<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip magic" id="bTarot">🔮 塔罗</button></div>
+<div class="bar" id="tools"><button class="chip" id="bDaily">☀ 每日一图</button><button class="chip" id="bRand">🎲 随机一张</button><button class="chip magic" id="bTarot">🔮 塔罗</button><a class="chip tool" id="bToolsLink" href="tools.html" aria-label="工具箱：图片压缩、视频转 GIF"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1"/><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 13h18M10.5 12v2.4h3V12"/></svg><span>工具箱</span></a></div>
 <main class="wall" id="wall"></main>
 <div id="more"><p class="mz">更多的故事即将到来~</p><p class="me">More stories are on the way</p>
 <button id="tarotGate" class="gate" aria-label="命运之书 · 塔罗占卜"><span class="orbit"><i style="--k:0">✦</i><i style="--k:1">☾</i><i style="--k:2">✧</i><i style="--k:3">☉</i><i style="--k:4">✦</i><i style="--k:5">☽</i></span><div class="bk"><div class="bk-3d"><i class="bk-back"></i><i class="bk-pg p1"></i><i class="bk-pg p2"></i><i class="bk-pg p3"></i><div class="bk-cover"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="36"/><circle cx="50" cy="50" r="30" stroke-dasharray="1 3"/><path d="M50.0 24.0L53.8 40.8L68.4 31.6L59.2 46.2L76.0 50.0L59.2 53.8L68.4 68.4L53.8 59.2L50.0 76.0L46.2 59.2L31.6 68.4L40.8 53.8L24.0 50.0L40.8 46.2L31.6 31.6L46.2 40.8Z"/><path d="M88.0 50.0L96.0 50.0M86.7 59.8L91.5 61.1M82.9 69.0L89.8 73.0M76.9 76.9L80.4 80.4M69.0 82.9L73.0 89.8M59.8 86.7L61.1 91.5M50.0 88.0L50.0 96.0M40.2 86.7L38.9 91.5M31.0 82.9L27.0 89.8M23.1 76.9L19.6 80.4M17.1 69.0L10.2 73.0M13.3 59.8L8.5 61.1M12.0 50.0L4.0 50.0M13.3 40.2L8.5 38.9M17.1 31.0L10.2 27.0M23.1 23.1L19.6 19.6M31.0 17.1L27.0 10.2M40.2 13.3L38.9 8.5M50.0 12.0L50.0 4.0M59.8 13.3L61.1 8.5M69.0 17.1L73.0 10.2M76.9 23.1L80.4 19.6M82.9 31.0L89.8 27.0M86.7 40.2L91.5 38.9"/><path d="M50 40a10 10 0 1 0 0 20a6 10 0 1 1 0-20z" stroke-opacity=".0"/><circle cx="50" cy="50" r="3" fill="#ecd29a" stroke="none"/></svg></div></div><b class="bk-halo"></b></div><span class="gt">命运之书</span><span class="ge">Book of Fate · Tarot</span><span class="gh">轻触，翻开今日的牌</span></button>
@@ -47,7 +46,6 @@
 
 <script src="photos.js"></script>
 <script src="stories.js"></script>
-<script src="tarot-portal.js" defer></script>
 <script>
 /* ========== 配置区：只需改这里 ========== */
 const SITE = { title: "我的照片墙", titleEn: "My Photo Wall", subtitle: "把值得记住的瞬间，挂在墙上" };
@@ -485,26 +483,30 @@ addEventListener("keydown", e => {
 });
 console.log("%c悄悄告诉你：连点标题 5 下试试 🎆", "color:#c0714a;font-size:14px");
 
-/* ===== 命运之书入口：被魔法书吸进去（three.js 星门）→ 进入塔罗页 ===== */
+/* ===== 命运之书入口：被魔法书吸进去 → 进入塔罗页（页面整体旋转着缩进书里） ===== */
 async function enterTarot() {
   if (entering || bOpen) return; entering = true;
   const go = () => { try { sessionStorage.setItem("pwTarot", "1"); } catch (e) {} location.href = TAROT_URL; };
   if (reduceMo()) return go();
   const gate = $("tarotGate"), bk = gate.querySelector(".bk"), g = bk.getBoundingClientRect(), vis = g.bottom > 40 && g.top < innerHeight - 40;
-  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, clone = bk.cloneNode(true);
+  const bx = vis ? g.left + g.width / 2 : innerWidth / 2, by = vis ? g.top + g.height / 2 : innerHeight * .46, fx = loadFx().catch(() => null), clone = bk.cloneNode(true);
   clone.style.cssText = "position:fixed;z-index:34;margin:0;left:" + (bx - g.width / 2) + "px;top:" + (by - g.height / 2) + "px;width:" + g.width + "px;height:" + g.height + "px";
   document.body.append(clone); gate.style.visibility = "hidden"; document.body.classList.add("sucking");
-  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a140a,#030207 70%)"; document.body.append(dark);
+  const dark = el("div"); dark.style.cssText = "position:fixed;inset:0;z-index:30;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#1a0f4a,#050316 70%)"; document.body.append(dark);
   dark.animate([{ opacity: 0 }, { opacity: .96 }], { duration: 1300, easing: "ease-in", fill: "forwards" });
-  setTimeout(() => clone.classList.add("open"), 350); if (window.TarotPortal) TarotPortal.warp(bx, by); // three.js 星门（库没就绪会自己放弃，不影响其余动画）
+  const w = $("pgw"), sy = scrollY, inner = el("div"); // 只把“当前这一屏”做成图层来旋转：整页很长，整体做图层会占用大量显存、容易卡
+  document.documentElement.style.overflowY = "scroll"; // 保留滚动条的位置，避免页面宽度变化引起重新排版
+  inner.style.transform = "translateY(" + -sy + "px)"; while (w.firstChild) inner.append(w.firstChild); w.append(inner);
+  w.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100vh;overflow:hidden;z-index:20;will-change:transform,opacity;transform-origin:" + bx + "px " + by + "px";
+  w.animate([{ transform: "rotate(0deg) scale(1)", opacity: 1 }, { transform: "rotate(540deg) scale(.03)", opacity: .1 }], { duration: 1500, easing: "cubic-bezier(.55,0,.85,.35)", fill: "forwards" });
+  setTimeout(() => clone.classList.add("open"), 350); fx.then(F => F && F.vortex(bx, by, 1500));
   await new Promise(r => setTimeout(r, 1250));
   clone.animate([{ transform: "scale(1)" }, { transform: "scale(1.6)" }], { duration: 320, easing: "ease-out", fill: "forwards" });
-  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#f3d99b 60%)"; document.body.append(fl);
+  const fl = el("div"); fl.style.cssText = "position:fixed;inset:0;z-index:36;pointer-events:none;opacity:0;background:radial-gradient(circle at " + bx + "px " + by + "px,#fff,#c9b6ff 60%)"; document.body.append(fl);
   fl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, fill: "forwards" });
   await new Promise(r => setTimeout(r, 340)); go();
 }
 $("bTarot").onclick = enterTarot; $("tarotGate").onclick = enterTarot;
-["pointerenter", "touchstart"].forEach(ev => [$("bTarot"), $("tarotGate")].forEach(n => n.addEventListener(ev, () => window.TarotPortal && TarotPortal.preload(), { once: true, passive: true }))); // 一靠近就预加载 three.js，点击时立刻能开始动画
 addEventListener("pageshow", e => { if (e.persisted) location.reload(); }); // 从塔罗页按返回键回来时，重置页面状态
 try { if (sessionStorage.getItem("pwBack") === "1") { // 从塔罗页返回：页面从书里旋转着“吐”回来
   sessionStorage.removeItem("pwBack"); const w = $("pgw"), hs = document.documentElement.style;

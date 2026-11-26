@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>工具箱 · Toolbox</title>
+<meta name="description" content="图片压缩、视频转 GIF。所有处理都在浏览器里完成，文件不会上传。">
+<link rel="stylesheet" href="tools.css">
+</head>
+<body>
+<div class="bgx" aria-hidden="true"><i></i><i></i></div>
+
+<header class="th">
+  <a class="back" href="index.html">← 返回照片墙</a>
+  <h1>工具箱</h1>
+  <p class="en">Toolbox</p>
+  <p class="sub">所有处理都在你的浏览器里完成，文件不会上传到任何服务器</p>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="on" data-tab="img" role="tab">图片压缩 <small>Compress</small></button>
+  <button data-tab="gif" role="tab">视频转 GIF <small>Video → GIF</small></button>
+</nav>
+
+<main>
+  <!-- ===== 图片压缩 ===== -->
+  <section id="img" class="panel on">
+    <label class="drop" id="imgDrop" tabindex="0">
+      <input class="fin" id="imgIn" type="file" accept="image/*" multiple tabindex="-1" aria-label="选择图片">
+      <b>点击选择图片，或把图片拖到这里</b>
+      <span>支持 JPG / PNG / WebP，可一次选择多张（最多 30 张）。GIF 动图不支持压缩</span>
+    </label>
+
+    <div class="card" id="imgCtl" hidden>
+      <div class="row"><span class="lab">压缩程度</span>
+        <div class="seg" id="imgPre"><button data-q="92">轻度</button><button data-q="80" class="on">标准</button><button data-q="62">强力</button><button data-q="40">极限</button></div></div>
+      <div class="row"><span class="lab">自定义质量 <b id="qv">80</b>%</span><input id="imgQ" type="range" min="20" max="100" value="80"></div>
+      <div class="row two">
+        <label>输出格式<select id="imgFmt"><option value="auto">自动（推荐）</option><option value="jpeg">JPEG</option><option value="webp">WebP</option><option value="png">PNG（只能靠缩小尺寸压缩）</option></select></label>
+        <label>最长边不超过<select id="imgMax"><option value="0">保持原尺寸</option><option value="3840">3840 px</option><option value="2560">2560 px</option><option value="1920">1920 px</option><option value="1280">1280 px</option><option value="1080">1080 px</option><option value="720">720 px</option></select></label>
+      </div>
+      <p class="tip">压缩后会自动去掉照片里的拍摄位置等隐私信息（EXIF）。质量越低文件越小，画质损失也越明显。</p>
+    </div>
+
+    <div class="sum" id="imgSum" hidden>
+      <div class="sumt"><span>合计</span><b id="sumFrom">0 MB</b><i>→</i><b id="sumTo" class="hl">0 MB</b><em id="sumPct"></em></div>
+      <div class="sumb"><button id="imgZip" class="btn">全部下载（ZIP）</button><button id="imgClear" class="btn ghost">清空</button></div>
+    </div>
+    <div id="imgList" class="list"></div>
+  </section>
+
+  <!-- ===== 视频转 GIF ===== -->
+  <section id="gif" class="panel">
+    <label class="drop" id="gifDrop" tabindex="0">
+      <input class="fin" id="gifIn" type="file" accept="video/*" tabindex="-1" aria-label="选择视频">
+      <b>点击选择视频，或把视频拖到这里</b>
+      <span>推荐 MP4 / WebM / MOV；可自己选择截取哪一段、截取多长（最长 30 秒）</span>
+    </label>
+    <p class="load" id="gifLoad" hidden></p>
+
+    <div id="gifBody" hidden>
+      <div class="card vidc"><video id="gifVid" controls muted playsinline webkit-playsinline preload="auto"></video><p class="meta" id="gifMeta"></p>
+        <p class="tip">小技巧：拖动上面的播放条找到想要的画面，再点下面的按钮，就能把当前这一帧设为起点/终点。</p>
+        <div class="vbtns"><button id="setStart" class="btn ghost sm" type="button">⇤ 以此画面为起点</button><button id="setEnd" class="btn ghost sm" type="button">以此画面为终点 ⇥</button></div></div>
+      <div class="card">
+        <div class="tl" aria-hidden="true"><i id="tlSel"></i></div>
+        <p class="tlinfo" id="tlInfo"></p>
+        <div class="row"><span class="lab">起始时间</span><input id="gifStart" type="range" min="0" max="10" step="0.1" value="0"><label class="num"><input id="stv" type="number" inputmode="decimal" min="0" step="0.1" value="0">秒</label></div>
+        <div class="row"><span class="lab">截取时长</span><input id="gifDur" type="range" min="0.5" max="30" step="0.1" value="4"><label class="num"><input id="dtv" type="number" inputmode="decimal" min="0.5" step="0.1" value="4">秒</label></div>
+        <div class="chips" id="durChips"><span>常用时长</span><button type="button" data-d="2">2 秒</button><button type="button" data-d="3">3 秒</button><button type="button" data-d="5">5 秒</button><button type="button" data-d="8">8 秒</button><button type="button" data-d="10">10 秒</button></div>
+        <div class="row two">
+          <label>GIF 宽度<select id="gifW"><option value="240">240 px（最小）</option><option value="320">320 px</option><option value="480" selected>480 px（推荐）</option><option value="640">640 px（最清晰）</option></select></label>
+          <label>帧率<select id="gifFps"><option value="5">5 帧/秒</option><option value="8">8 帧/秒</option><option value="10" selected>10 帧/秒</option><option value="12">12 帧/秒</option><option value="15">15 帧/秒（最流畅）</option></select></label>
+        </div>
+        <div class="row two">
+          <label>颜色数<select id="gifCol"><option value="256" selected>256 色（画质最好）</option><option value="128">128 色</option><option value="64">64 色（文件最小）</option></select></label>
+          <label>循环<select id="gifLoop"><option value="0" selected>无限循环</option><option value="1">只播一次</option></select></label>
+        </div>
+        <label class="chk"><input type="checkbox" id="gifDither"> 平滑渐变（抖动）<small>让天空、肤色等渐变更细腻，文件会略大</small></label>
+        <p class="est" id="gifEst">预计大小：计算中…</p>
+        <div class="btns"><button id="gifGo" class="btn">开始转换</button><button id="gifCancel" class="btn ghost" hidden>取消</button></div>
+        <div class="prog" id="gifProg" hidden><i id="gifBar"></i></div>
+        <p class="status" id="gifStatus"></p>
+      </div>
+      <div class="card res" id="gifRes" hidden>
+        <img id="gifOut" alt="转换结果">
+        <div class="resi"><p id="gifResInfo"></p><a id="gifDl" class="btn" download="video.gif">下载 GIF</a><p class="tip">手机上也可以长按左边的 GIF 图片保存（iPhone 会存入“照片”）。</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<script src="gif-encoder.js"></script>
+<script src="tools.js"></script>
+</body>
+</html>
