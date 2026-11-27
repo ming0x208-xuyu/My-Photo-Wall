@@ -19,6 +19,7 @@
     const r = await fetch(API + path, { method: opt.json ? "POST" : "GET", headers: { ...(token ? { Authorization: "Bearer " + token } : {}), ...(opt.json ? { "Content-Type": "application/json" } : {}) }, body: opt.json ? JSON.stringify(opt.json) : undefined });
     let d = {}; try { d = await r.json(); } catch (e) { }
     if (r.status === 401 && path !== "/login") { logout(); throw Object.assign(new Error("登录已失效，请重新登录"), { auth: true }); }
+    if (r.status === 404 || r.status === 405) throw Object.assign(new Error("没有连上后台 Worker（返回 " + r.status + "）：Cloudflare 里的路由「你的域名/api/admin/*」还没生效，或没有指向 photo-admin。请按 ADMIN-README 第 3 步第 6 点检查。"), { status: r.status, data: d, route: true });
     if (!r.ok) throw Object.assign(new Error(d.message || d.error || "请求失败（" + r.status + "）"), { status: r.status, data: d });
     return d;
   }
