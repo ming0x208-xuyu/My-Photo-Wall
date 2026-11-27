@@ -1,0 +1,30 @@
+/* ============ 后台页面：在 tools.css 的基础上补充的样式 ============ */
+.lg{max-width:420px;margin:30px auto 0;text-align:center}
+.lg .lgt{display:block;margin-bottom:14px;font-size:16px;letter-spacing:.1em}
+.lg input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);font-size:16px;text-align:center;letter-spacing:.2em}
+.lg input:focus{outline:0;border-color:var(--acc)}
+.lg .btn{width:100%;margin-top:14px}
+.lgerr{margin-top:10px;font:13px system-ui,sans-serif;color:#d1573b}
+.lab2{margin-bottom:10px;font-size:14px;letter-spacing:.08em}
+.chips.cat{margin:0 0 14px}
+.chips.cat button{padding:8px 16px;font-size:14px}
+.chips.cat button.on{border-color:var(--acc);background:var(--acc);color:#fff}
+.newcat input{width:100%;margin:-4px 0 14px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
+.newcat input:focus{outline:0;border-color:var(--acc)}
+#upDrop{margin-top:16px}
+.status{margin-top:10px;min-height:20px;text-align:center}
+.it .sz.ok{color:var(--ok)}.it .sz.er{color:#d1573b}
+.it .mini{height:6px;margin-top:8px;border-radius:99px;background:var(--line);overflow:hidden}.it .mini i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#ffb27a);transition:width .15s}
+.done{text-align:center}.dn1{font-size:18px;letter-spacing:.06em}.dn2{margin-top:10px;font:13px/1.9 system-ui,sans-serif;color:var(--mute)}.dn2 b{color:var(--ok)}
+.btn.danger{background:#c9473a}
+/* 管理：照片网格 */
+.mg{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.mi{position:relative;border:2px solid transparent;border-radius:14px;overflow:hidden;background:var(--card);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .2s,transform .2s}
+.mi img,.mi .ph{display:block;width:100%;aspect-ratio:1;object-fit:cover;background:var(--line)}
+.mi .ph{display:flex;align-items:center;justify-content:center;font:12px system-ui,sans-serif;color:var(--mute);text-align:center;padding:6px}
+.mi .cap{padding:6px 8px 8px;font:11px/1.5 system-ui,sans-serif;color:var(--mute);word-break:break-all}
+.mi .cap b{display:block;color:var(--fg);font-weight:500}
+.mi.on{border-color:#c9473a;transform:scale(.97)}
+.mi.on::after{content:"✓";position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:#c9473a;color:#fff;font:700 14px/24px system-ui,sans-serif;text-align:center}
+.foot{margin-top:34px;text-align:center}
+.lnk{border:0;background:none;color:var(--mute);font:13px system-ui,sans-serif;text-decoration:underline;padding:8px}
