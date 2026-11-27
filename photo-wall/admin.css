@@ -27,3 +27,4 @@
 .foot{margin-top:34px;text-align:center}
 .lnk{border:0;background:none;color:var(--mute);font:13px system-ui,sans-serif;text-decoration:underline;padding:8px}
 .lab2 small{color:#d1573b;font:12px system-ui,sans-serif;margin-left:6px}
+.caterr{width:100%;padding:12px 14px;border-radius:12px;background:rgba(209,87,59,.12);color:#d1573b;font:13px/1.8 system-ui,sans-serif}.caterr .lnk{display:block;margin-top:4px;padding:4px 0;color:inherit}

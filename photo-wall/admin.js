@@ -42,19 +42,21 @@
   document.querySelectorAll(".tabs button").forEach(b => { b.onclick = () => { document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b)); document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === b.dataset.tab)); if (b.dataset.tab === "mg") loadManage(); }; });
 
   /* ---------- 分类：只能从已有的分类里选，不能新建 ---------- */
-  let curCat = store.get(CATKEY);
+  let curCat = store.get(CATKEY), catMsg = "";
   function renderCats() {
     const box = $("catChips"); box.replaceChildren();
-    if (!cats.length) box.innerHTML = '<span class="tip">还没有读到任何分类。分类来自仓库里 photos/ 下的文件夹，请先在电脑上建好分类并推送一次。</span>';
+    if (!cats.length) { const m = el("div", "caterr"); m.append(document.createTextNode(catMsg || "还没有读到任何分类。分类来自仓库里 photos/ 下的文件夹。")); const r = el("button", "lnk", "重新读取"); r.type = "button"; r.onclick = refreshCats; m.append(r); box.append(m); }
     cats.forEach(c => { const b = el("button", curCat === c ? "on" : ""); b.type = "button"; b.textContent = c; b.onclick = () => { curCat = c; store.set(CATKEY, c); renderCats(); sync(); }; box.append(b); });
     $("catHint").textContent = cats.length && !curCat ? "（请先选一个）" : "";
     sync();
   }
   async function refreshCats() {
+    catMsg = "正在读取分类…"; renderCats();
     try {
       const d = await api("/list"); cats = d.categories || []; known = new Set((d.photos || []).map(p => p.path));
       if (!cats.includes(curCat)) curCat = cats.length === 1 ? cats[0] : "";   // 记住的分类没了就清空；只有一个分类时自动选中
-    } catch (e) { if (!e.auth) toast("读取分类失败：" + e.message); }
+      catMsg = cats.length ? "" : "已经连上你的 GitHub 仓库（共 " + d.total + " 个文件），但 photos/ 文件夹下没有找到分类。请确认照片放在 photos/分类名/ 里，并且已经推送到 GitHub。";
+    } catch (e) { if (!e.auth) { cats = []; catMsg = "读取分类失败：" + e.message; } }
     renderCats();
   }
 
