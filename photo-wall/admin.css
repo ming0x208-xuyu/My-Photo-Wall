@@ -9,8 +9,6 @@
 .chips.cat{margin:0 0 14px}
 .chips.cat button{padding:8px 16px;font-size:14px}
 .chips.cat button.on{border-color:var(--acc);background:var(--acc);color:#fff}
-.newcat input{width:100%;margin:-4px 0 14px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px}
-.newcat input:focus{outline:0;border-color:var(--acc)}
 #upDrop{margin-top:16px}
 .status{margin-top:10px;min-height:20px;text-align:center}
 .it .sz.ok{color:var(--ok)}.it .sz.er{color:#d1573b}
@@ -28,3 +26,4 @@
 .mi.on::after{content:"✓";position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:#c9473a;color:#fff;font:700 14px/24px system-ui,sans-serif;text-align:center}
 .foot{margin-top:34px;text-align:center}
 .lnk{border:0;background:none;color:var(--mute);font:13px system-ui,sans-serif;text-decoration:underline;padding:8px}
+.lab2 small{color:#d1573b;font:12px system-ui,sans-serif;margin-left:6px}

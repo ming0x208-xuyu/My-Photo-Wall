@@ -41,21 +41,22 @@
   /* ---------- 标签 ---------- */
   document.querySelectorAll(".tabs button").forEach(b => { b.onclick = () => { document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b)); document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === b.dataset.tab)); if (b.dataset.tab === "mg") loadManage(); }; });
 
-  /* ---------- 分类 ---------- */
-  let curCat = store.get(CATKEY);   // "" = 不分类；"__new" = 新建
-  const cleanCat = s => String(s || "").replace(/[\\\/:*?"<>|\x00-\x1f]/g, "").replace(/^[.\s]+|\s+$/g, "").slice(0, 30);
+  /* ---------- 分类：只能从已有的分类里选，不能新建 ---------- */
+  let curCat = store.get(CATKEY);
   function renderCats() {
     const box = $("catChips"); box.replaceChildren();
-    const add = (label, val) => { const b = el("button", curCat === val ? "on" : ""); b.type = "button"; b.textContent = label; b.onclick = () => { curCat = val; store.set(CATKEY, val === "__new" ? "" : val); renderCats(); if (val === "__new") $("newCat").focus(); }; box.append(b); };
-    add("不分类", ""); cats.forEach(c => add(c, c)); add("＋ 新分类", "__new");
-    $("newCatBox").hidden = curCat !== "__new";
+    if (!cats.length) box.innerHTML = '<span class="tip">还没有读到任何分类。分类来自仓库里 photos/ 下的文件夹，请先在电脑上建好分类并推送一次。</span>';
+    cats.forEach(c => { const b = el("button", curCat === c ? "on" : ""); b.type = "button"; b.textContent = c; b.onclick = () => { curCat = c; store.set(CATKEY, c); renderCats(); sync(); }; box.append(b); });
+    $("catHint").textContent = cats.length && !curCat ? "（请先选一个）" : "";
+    sync();
   }
   async function refreshCats() {
-    try { const d = await api("/list"); cats = d.categories || []; known = new Set((d.photos || []).map(p => p.path)); if (curCat && curCat !== "__new" && !cats.includes(curCat)) curCat = ""; }
-    catch (e) { if (!e.auth) toast("读取分类失败：" + e.message); }
+    try {
+      const d = await api("/list"); cats = d.categories || []; known = new Set((d.photos || []).map(p => p.path));
+      if (!cats.includes(curCat)) curCat = cats.length === 1 ? cats[0] : "";   // 记住的分类没了就清空；只有一个分类时自动选中
+    } catch (e) { if (!e.auth) toast("读取分类失败：" + e.message); }
     renderCats();
   }
-  const pickedCat = () => curCat === "__new" ? cleanCat($("newCat").value) : curCat;
 
   /* ---------- 选择照片 ---------- */
   const MIME = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", heic: "image/heic", heif: "image/heif", avif: "image/avif", bmp: "image/bmp", gif: "image/gif" };
@@ -100,7 +101,7 @@
   function sync() {
     const n = items.filter(i => i.state !== "ok").length;
     $("upCtl").hidden = !items.length; $("upCount").textContent = "已选 " + items.length + " 张，" + fmtMB(items.reduce((s, i) => s + i.file.size, 0));
-    $("upGo").disabled = busy || !n; $("upGo").textContent = busy ? "上传中…" : "上传 " + n + " 张"; $("upClear").disabled = busy;
+    $("upGo").disabled = busy || !n || !curCat; $("upGo").textContent = busy ? "上传中…" : !curCat && n ? "请先选分类" : "上传 " + n + " 张"; $("upClear").disabled = busy;
   }
   $("upClear").onclick = () => { if (busy) return; items.forEach(i => URL.revokeObjectURL(i.url)); items.length = 0; $("upList").replaceChildren(); $("upProg").hidden = true; $("upStatus").textContent = ""; sync(); };
 
@@ -180,13 +181,13 @@
   function makePath(cat, ext, seq) {
     const d = new Date(), r = Math.random().toString(16).slice(2, 6).padEnd(4, "0");
     const name = d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()) + "-" + r + seq + "." + ext;   // 数字开头的名字，网站会自动起好听的标题
-    return "photos/" + (cat ? cat + "/" : "") + name;
+    return "photos/" + cat + "/" + name;
   }
 
   $("upGo").onclick = async () => {
     if (busy) return; const todo = items.filter(i => i.state !== "ok"); if (!todo.length) return;
-    if (curCat === "__new" && !pickedCat()) return toast("请先输入新分类的名字");
-    const cat = pickedCat(), strip = $("optGps").checked, total = todo.reduce((s, i) => s + i.file.size, 0); let doneBytes = 0, seq = 0;
+    if (!curCat) return toast("请先选择一个分类");
+    const cat = curCat, strip = $("optGps").checked, total = todo.reduce((s, i) => s + i.file.size, 0); let doneBytes = 0, seq = 0;
     busy = true; sync(); $("upDone").hidden = true; $("upProg").hidden = false; $("upBar").style.width = "0%";
     try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(l => { wake = l; }, () => { }); } catch (e) { }
     const added = [];
@@ -209,7 +210,7 @@
         try { await api("/commit", { json: { add: added.map(i => ({ path: i.path, sha: i.sha })), message: "后台上传 " + added.length + " 张照片" + (cat ? "（" + cat + "）" : "") } }); }
         catch (e) { if (e.auth) throw e; added.forEach(i => { i.state = "err"; i.err = "提交失败：" + e.message + "（点“上传”可重试）"; i.sha = null; paint(i); }); throw e; }
         added.forEach(i => { i.state = "ok"; known.add(i.path); paint(i); });
-        $("upStatus").textContent = ""; showDone(added); if (cat && !cats.includes(cat)) { cats.push(cat); cats.sort(); curCat = cat; store.set(CATKEY, cat); renderCats(); }
+        $("upStatus").textContent = ""; showDone(added);
       } else $("upStatus").textContent = "没有照片上传成功，请看每张照片下面的原因";
     } catch (e) { if (!e.auth) { $("upStatus").textContent = e.message; toast(e.message); } else toast(e.message); }
     finally { busy = false; try { wake && wake.release(); } catch (e) { } wake = null; sync(); setTimeout(() => { if (!busy) $("upProg").hidden = true; }, 1200); }
