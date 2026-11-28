@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHONUTF8: "1"       # 让中文文件名/中文输出在服务器上也不出错
+      # 可选：想让 AI 给照片写小故事，就在仓库 Settings → Secrets and variables → Actions 里添加名为 ANTHROPIC_API_KEY 的密钥。
+      # 没添加时这里是空的，build.py 会自动改用“词库组合”生成故事（免费、不联网）。详见 STORY-README.md
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
