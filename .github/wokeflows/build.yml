@@ -4,13 +4,12 @@
 name: build-photos
 
 on:
-  push:
-    branches: [main]
+  push:                     # 不限定分支名（main / master 都行）
     paths:
       - "photos/**"
       - "build.py"
       - ".github/workflows/build.yml"
-  workflow_dispatch:        # 也可以在 GitHub 的 Actions 页面手动点“Run workflow”
+  workflow_dispatch:        # 也可以在 GitHub 的 Actions 页面手动点“Run workflow”，立刻重新生成一遍
 
 permissions:
   contents: write           # 允许把生成结果提交回仓库
@@ -22,6 +21,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PYTHONUTF8: "1"       # 让中文文件名/中文输出在服务器上也不出错
     steps:
       - uses: actions/checkout@v4
 
@@ -39,11 +40,14 @@ jobs:
         run: |
           git config user.name "photo-wall-bot"
           git config user.email "photo-wall-bot@users.noreply.github.com"
-          git add -A thumbs large photos.js og.jpg .build-cache.json
+          # 逐个添加：不存在的跳过；-f 表示即使被 .gitignore 挡住也照样提交（避免因为 .gitignore 报错）
+          for f in thumbs large photos.js og.jpg .build-cache.json; do
+            if [ -e "$f" ]; then git add -A -f -- "$f"; fi
+          done
           if git diff --cached --quiet; then
             echo "没有变化，不需要提交"
           else
             git commit -m "自动生成缩略图和照片清单"
-            git pull --rebase origin main
-            git push
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi

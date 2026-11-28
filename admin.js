@@ -12,7 +12,8 @@
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const store = { get: k => { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } }, del: k => { try { localStorage.removeItem(k); } catch (e) { } } };
   let tto; const toast = m => { const t = $("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tto); tto = setTimeout(() => t.classList.remove("on"), 3400); };
-  let token = store.get(KEY), cats = [], known = new Set(), busy = false, wake = null;
+  let token = store.get(KEY), cats = [], known = new Set(), busy = false, wake = null, repoName = "";
+  const actionsLink = txt => '<a href="https://github.com/' + (repoName || "") + '/actions" target="_blank" rel="noopener" style="color:var(--acc)">' + txt + "</a>";
 
   /* ---------- 请求 ---------- */
   async function api(path, opt = {}) {
@@ -53,9 +54,11 @@
   async function refreshCats() {
     catMsg = "正在读取分类…"; renderCats();
     try {
-      const d = await api("/list"); cats = d.categories || []; known = new Set((d.photos || []).map(p => p.path));
+      const d = await api("/list"); repoName = d.repo || repoName; cats = d.categories || []; known = new Set((d.photos || []).map(p => p.path));
       if (!cats.includes(curCat)) curCat = cats.length === 1 ? cats[0] : "";   // 记住的分类没了就清空；只有一个分类时自动选中
-      catMsg = cats.length ? "" : "已经连上你的 GitHub 仓库（共 " + d.total + " 个文件），但 photos/ 文件夹下没有找到分类。请确认照片放在 photos/分类名/ 里，并且已经推送到 GitHub。";
+      catMsg = cats.length ? "" : "已经连上你的 GitHub 仓库（分支 " + d.branch + "，共 " + d.total + " 个文件，其中图片 " + d.imgTotal + " 张），但在 photos/分类名/ 下没有找到图片。\n" +
+        (d.imgDirs && d.imgDirs.length ? "仓库里的图片主要在：" + d.imgDirs.map(x => x.dir + "（" + x.n + " 张）").join("、") + "\n" : "仓库里一张图片都没有找到。\n") +
+        "仓库根目录有：" + (d.topLevel || []).join("、") + (d.truncated ? "\n（文件太多，清单被 GitHub 截断了）" : "");
     } catch (e) { if (!e.auth) { cats = []; catMsg = "读取分类失败：" + e.message; } }
     renderCats();
   }
@@ -222,7 +225,7 @@
   let watchTk = 0;
   function showDone(list) {
     $("upDone").hidden = false; $("dn1").textContent = "✓ 已提交 " + list.length + " 张照片到 GitHub";
-    $("dn2").innerHTML = '<span class="spin"></span>正在等待网站更新…（通常 1–3 分钟，期间可以放心关掉这个页面）';
+    $("dn2").innerHTML = '<span class="spin"></span>正在等待网站更新…（通常 1–3 分钟，期间可以放心关掉这个页面）<br>' + actionsLink("查看自动构建进度（GitHub Actions）");
     $("upDone").scrollIntoView({ behavior: "smooth", block: "nearest" }); watchOnline(list.map(i => i.path));
   }
   async function watchOnline(paths) {
@@ -231,7 +234,7 @@
       await sleep(10000); if (tk !== watchTk) return;
       try { const t = await (await fetch("photos.js?_=" + Date.now(), { cache: "no-store" })).text(); if (paths.every(p => t.includes(p))) { $("dn2").innerHTML = '<b>网站已更新 ✓</b>　<a href="index.html" style="color:var(--acc)">去首页看看</a>'; return; } } catch (e) { }
     }
-    if (tk === watchTk) $("dn2").textContent = "超过 8 分钟还没看到更新。可能是 GitHub Actions 还在运行或出错了，请到 GitHub 仓库的 Actions 页面查看。";
+    if (tk === watchTk) $("dn2").innerHTML = "超过 8 分钟还没看到更新。照片已经安全地在 GitHub 里了，只是“自动生成缩略图”这一步没有成功。请" + actionsLink("打开 GitHub Actions 页面") + "看最近一次 build-photos：绿色 = 成功（再等 Cloudflare 部署）；红色 = 失败（点进去看报错）；一次运行都没有 = 自动构建没被触发（见 ADMIN-README「照片一直处理中」）。";
   }
 
   /* ---------- 管理：查看 / 删除 ---------- */
@@ -240,10 +243,10 @@
     try { const t = await (await fetch("photos.js?_=" + Date.now(), { cache: "no-store" })).text(); const w = {}; new Function("window", t)(w); return w.PHOTOS_BUILT || []; } catch (e) { return []; }
   }
   async function loadManage() {
-    $("mgCount").textContent = "读取中…"; $("mgGrid").replaceChildren(); sel.clear(); updDel();
+    $("mgCount").textContent = "读取中…"; $("mgGrid").replaceChildren(); $("mgWarn").hidden = true; sel.clear(); updDel();
     try {
       const [d, built] = await Promise.all([api("/list"), loadBuilt()]);
-      cats = d.categories || []; known = new Set(d.photos.map(p => p.path)); renderCats();
+      repoName = d.repo || repoName; cats = d.categories || []; known = new Set(d.photos.map(p => p.path)); renderCats();
       const order = new Map(built.map((b, i) => [b.src, i])), thumb = new Map(built.map(b => [b.src, b.thumb]));
       const list = d.photos.slice().sort((a, b) => (order.has(a.path) ? order.get(a.path) : -1) - (order.has(b.path) ? order.get(b.path) : -1));   // 还在处理中的排最前面
       const total = list.reduce((s, p) => s + p.size, 0);
@@ -256,6 +259,8 @@
         n.onclick = () => { if (sel.has(p.path)) { sel.delete(p.path); n.classList.remove("on"); } else { sel.add(p.path); n.classList.add("on"); } updDel(); };
         $("mgGrid").append(n);
       }
+      const pending = list.filter(p => !thumb.has(p.path)).length;
+      if (pending) { $("mgWarn").hidden = false; $("mgWarn").innerHTML = "有 " + pending + " 张照片还在“处理中”：原图已经在 GitHub 里，但缩略图和清单还没生成，所以首页暂时看不到。通常 1–3 分钟；如果超过 5 分钟，请" + actionsLink("打开 GitHub Actions") + "看 build-photos 有没有运行、有没有报红。也可以在那里点 Run workflow 手动生成一次。"; }
       if (!list.length) $("mgGrid").innerHTML = '<p class="tip" style="grid-column:1/-1;text-align:center;padding:30px 0">还没有照片</p>';
     } catch (e) { if (!e.auth) $("mgCount").textContent = "读取失败：" + e.message; }
   }
