@@ -40,14 +40,28 @@ jobs:
         run: |
           git config user.name "photo-wall-bot"
           git config user.email "photo-wall-bot@users.noreply.github.com"
-          # 逐个添加：不存在的跳过；-f 表示即使被 .gitignore 挡住也照样提交（避免因为 .gitignore 报错）
-          for f in thumbs large photos.js og.jpg .build-cache.json; do
-            if [ -e "$f" ]; then git add -A -f -- "$f"; fi
+          BR="${GITHUB_REF_NAME}"
+
+          # 把生成结果提交成一个 commit。没有变化返回 1。
+          # 逐个添加：不存在的跳过；-f 表示即使被 .gitignore 挡住也照样提交
+          commit_generated() {
+            for f in thumbs large photos.js og.jpg .build-cache.json; do
+              if [ -e "$f" ]; then git add -A -f -- "$f"; fi
+            done
+            if git diff --cached --quiet; then return 1; fi
+            git commit -q -m "自动生成缩略图和照片清单"
+          }
+
+          # 缩略图和 photos.js 是“由照片算出来的文件”，不能合并，只能重新生成。
+          # 所以：推送被拒绝（构建期间远程又有了新提交）时，不做 rebase 合并，
+          # 而是丢掉这次的结果 → 取最新代码 → 重新生成 → 再推送。
+          for attempt in 1 2 3 4 5; do
+            if ! commit_generated; then echo "没有变化，不需要提交"; exit 0; fi
+            if git push origin "HEAD:${BR}"; then echo "已推送"; exit 0; fi
+            echo "第 ${attempt} 次推送失败（远程有新提交），取最新代码后重新生成…"
+            git fetch origin "${BR}"
+            git reset --hard "origin/${BR}"
+            python build.py
           done
-          if git diff --cached --quiet; then
-            echo "没有变化，不需要提交"
-          else
-            git commit -m "自动生成缩略图和照片清单"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
-          fi
+          echo "连续 5 次都推送失败，请稍后在 Actions 页面点 Run workflow 重试"
+          exit 1
